@@ -1,12 +1,12 @@
 import { Button } from '#/components/ui/button'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/_app/')({ component: Home })
 
 function Home() {
   return (
-    <div className="p-8">
-      <h1 className="font-heading text-4xl font-bold">
+    <div className="">
+      <h1 className="font-heading text-2xl font-bold md:text-4xl">
         Welcome to TanStack Start
       </h1>
       <p className="mt-4 text-lg">
