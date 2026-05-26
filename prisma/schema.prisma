@@ -1,0 +1,237 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- Pooled resources ---
+
+model School {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  users User[]
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  users User[]
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  collections CollectionTag[]
+}
+
+// --- Auth (better-auth tables) ---
+
+model User {
+  id              String   @id @default(cuid())
+  name            String?
+  username        String   @unique
+  displayUsername String?
+  email           String   @unique
+  image           String?
+  role            UserRole @default(USER)
+  emailVerified   Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  school       School?     @relation(fields: [schoolId], references: [id])
+  schoolId     String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  departmentId String?
+
+  // better-auth relations
+  sessions Session[]
+  accounts Account[]
+
+  collections   Collection[]   @relation("AuthoredCollections")
+  saves         Save[]
+  collaborating Collaborator[]
+  comments      Comment[]
+  pagesUploaded Page[]
+  activityFeed  Activity[]     @relation("RecipientActivity")
+  activityDone  Activity[]     @relation("ActorActivity")
+
+  @@map("user")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// --- Core models ---
+
+model Collection {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  bannerUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author   User   @relation("AuthoredCollections", fields: [authorId], references: [id])
+  authorId String
+
+  pages         Page[]
+  tags          CollectionTag[]
+  saves         Save[]
+  collaborators Collaborator[]
+  comments      Comment[]
+  activities    Activity[]
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  position  Int
+  createdAt DateTime @default(now())
+
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String
+  uploadedBy   User       @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+
+  activities Activity[]
+}
+
+// --- Join tables ---
+
+model CollectionTag {
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String
+  tag          Tag        @relation(fields: [tagId], references: [id])
+  tagId        String
+
+  @@id([collectionId, tagId])
+}
+
+model Save {
+  id      String   @id @default(cuid())
+  savedAt DateTime @default(now())
+
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String
+
+  @@unique([userId, collectionId])
+}
+
+model Collaborator {
+  id      String   @id @default(cuid())
+  addedAt DateTime @default(now())
+
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String
+
+  @@unique([userId, collectionId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String
+
+  activities Activity[]
+}
+
+// --- Activity ---
+
+enum ActivityType {
+  SAVE
+  COMMENT
+  PAGE_ADDED
+  PAGE_DELETED
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  type      ActivityType
+  body      String?
+  read      Boolean      @default(false)
+  createdAt DateTime     @default(now())
+
+  recipient   User   @relation("RecipientActivity", fields: [recipientId], references: [id], onDelete: Cascade)
+  recipientId String
+  actor       User   @relation("ActorActivity", fields: [actorId], references: [id], onDelete: Cascade)
+  actorId     String
+
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String
+  page         Page?      @relation(fields: [pageId], references: [id])
+  pageId       String?
+  comment      Comment?   @relation(fields: [commentId], references: [id])
+  commentId    String?
+}

@@ -21,6 +21,7 @@ body {
 }
 
 :root {
+  --background: oklch(0.9699 0.0013 106.42);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -137,7 +138,7 @@ body {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
   button:not(:disabled),
   [role='button']:not(:disabled) {
@@ -155,39 +156,6 @@ body {
   @apply flex items-center justify-between;
 }
 
-.app-shell {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  display: none; /* hidden on mobile */
-}
-
-.main-content {
-  padding-bottom: 56px; /* space for bottom bar */
-}
-
-.bottom-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  display: flex;
-  border-top: 1px solid var(--border);
-}
-
-.bottom-tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 10px;
-}
-
 /* Desktop */
 @media (min-width: 768px) {
   .sidebar {
@@ -195,11 +163,5 @@ body {
     flex-direction: column;
     width: 240px;
     border-right: 1px solid var(--border);
-  }
-  .bottom-bar {
-    display: none;
-  }
-  .main-content {
-    padding-bottom: 0;
   }
 }
