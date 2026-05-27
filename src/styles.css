@@ -1,8 +1,8 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
-@import '@fontsource-variable/inter';
-@import '@fontsource-variable/montserrat';
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/montserrat";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -91,8 +91,8 @@ body {
 }
 
 @theme inline {
-  --font-sans: 'Inter Variable', sans-serif;
-  --font-heading: 'Montserrat Variable', sans-serif;
+  --font-sans: "Inter Variable", sans-serif;
+  --font-heading: "Montserrat Variable", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -141,7 +141,7 @@ body {
     @apply bg-background text-foreground font-sans;
   }
   button:not(:disabled),
-  [role='button']:not(:disabled) {
+  [role="button"]:not(:disabled) {
     cursor: pointer;
   }
   html {
@@ -161,7 +161,16 @@ body {
   .sidebar {
     display: flex;
     flex-direction: column;
-    width: 240px;
+    width: 56px;
     border-right: 1px solid var(--border);
+  }
+}
+
+@layer components {
+  .card-img {
+    @apply dark:bg-secondary bg-foreground/80 relative aspect-2/1 w-full overflow-clip;
+    & > img {
+      @apply aspect-2/1 w-full object-cover opacity-100 mix-blend-overlay grayscale-10 dark:grayscale-20;
+    }
   }
 }

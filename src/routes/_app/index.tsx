@@ -13,7 +13,7 @@ import { useHeaderStore } from "#/lib/header-store"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { File02Icon, FilterIcon } from "@hugeicons/core-free-icons"
 
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { cn } from "#/lib/utils"
 
@@ -108,29 +108,33 @@ function Home() {
   return (
     <>
       <section className="flex-between gap-2">
-        <Input placeholder="Search collections" className="h-11 w-full" />
+        <Input
+          placeholder="Search collections and tags"
+          className="h-11 w-full"
+        />
         <Button variant="ghost" size="lg">
           <HugeiconsIcon icon={FilterIcon} className="size-6!" />
         </Button>
       </section>
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data.map((item, index) => (
           <Card size="sm" key={index} className="pt-0!">
-            <div className="bg-secondary relative aspect-2/1 w-full overflow-clip">
-              <img
-                src={item.image ?? "/loading-skeleton.jpg"}
-                alt={item.name}
-                className="aspect-2/1 w-full object-cover opacity-20 mix-blend-overlay grayscale-100"
-              />
-              <Badge
-                className={cn(
-                  "absolute top-2 right-2",
-                  item.type === "saved" ? "text-background bg-amber-500" : "",
-                )}
-              >
-                {item.type}
-              </Badge>
-            </div>
+            <Link to="/collections/ddfji" className="contents">
+              <div className="card-img">
+                <img
+                  src={item.image ?? "/card-loading-skeleton-unsplash.jpg"}
+                  alt={item.name}
+                />
+                <Badge
+                  className={cn(
+                    "absolute top-2 right-2",
+                    item.type === "saved" ? "text-background bg-amber-500" : "",
+                  )}
+                >
+                  {item.type}
+                </Badge>
+              </div>
+            </Link>
             <CardHeader>
               <CardTitle className="flex items-center gap-1">
                 {item.name}
@@ -146,23 +150,23 @@ function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-between py-0!">
-              <div className="flex items-center gap-1">
-                {item.tags.slice(0, 2).map((tag, index) => (
+              <div className="flex flex-1 items-center gap-1 overflow-x-hidden">
+                {item.tags.slice(0, 2).map((tag, tagIndex) => (
                   <span
-                    key={`${tag}-${index}`}
+                    key={`${tag}-${tagIndex}`}
                     className="rounded-full bg-blue-500/30 px-2 py-1 text-xs text-blue-500"
                   >
                     {tag}
                   </span>
                 ))}
                 {item.tags.length > 2 && (
-                  <Badge className="px-2 py-1 text-xs" variant="outline">
+                  <Badge className="h-max px-2 py-1 text-xs" variant="outline">
                     +{item.tags.length - 2}
                   </Badge>
                 )}
               </div>
 
-              <div className="flex-center text-muted-foreground gap-1 text-sm">
+              <div className="flex-center text-muted-foreground gap-1 text-xs sm:text-sm">
                 <HugeiconsIcon icon={File02Icon} size={16} />
                 <span>
                   {item.pages} page{item.pages !== 1 && "s"}

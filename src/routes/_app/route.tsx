@@ -1,4 +1,9 @@
 import { Header } from "#/components/sections/header"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "#/components/ui/tooltip"
 import { getSession } from "#/lib/auth-session"
 import { cn } from "#/lib/utils"
 import {
@@ -26,33 +31,51 @@ const tabs = [
 ]
 
 function AppLayout() {
-  const { location } = useRouterState()
-
   const { pathname } = useLocation()
 
   return (
     <div className="app-shell flex h-dvh!">
       {/* Sidebar — desktop only */}
-      <aside className="sidebar hidden">
-        <div className="sidebar-logo">Decker</div>
-        <nav className="sidebar-nav">
-          {tabs.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`sidebar-tab ${location.pathname === to ? "active" : ""}`}
-            >
-              <Icon size={20} />
-              <span>{label}</span>
-            </Link>
-          ))}
+      <aside className="sidebar z-1010 hidden flex-col">
+        <div className="flex-center h-12 w-full">{/* Decker */}</div>
+        <nav className="flex w-full flex-1 flex-col justify-center gap-2">
+          {tabs.map(({ to, label, icon: Icon, exactPath, fill }) => {
+            const isActive = exactPath
+              ? pathname === to
+              : pathname.startsWith(to)
+
+            return (
+              <Tooltip key={to}>
+                <TooltipTrigger
+                  render={
+                    <Link
+                      to={to}
+                      className={cn(
+                        "flex-center aspect-square w-full",
+                        isActive ? "text-foreground" : "text-muted-foreground",
+                      )}
+                    />
+                  }
+                >
+                  <Icon
+                    size={24}
+                    fill={isActive && fill ? "currentColor" : "transparent"}
+                    strokeWidth={isActive && !fill ? 3 : 2}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="right" align="center">
+                  {label}
+                </TooltipContent>
+              </Tooltip>
+            )
+          })}
         </nav>
       </aside>
 
       {/* Main content */}
       <section className="relative flex h-dvh flex-1 flex-col overflow-y-auto">
         <Header />
-        <main className="main-content relative [&>section]:p-4">
+        <main className="main-content relative flex-1 [&>section]:p-4">
           <Outlet />
         </main>
 

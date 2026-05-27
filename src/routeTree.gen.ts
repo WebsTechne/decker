@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
+import { Route as CollectionsIndexRouteImport } from './routes/collections/index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as CollectionsSplatRouteImport } from './routes/collections/$'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppExploreIndexRouteImport } from './routes/_app/explore/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -19,10 +21,20 @@ const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollectionsIndexRoute = CollectionsIndexRouteImport.update({
+  id: '/collections/',
+  path: '/collections/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRouteRoute,
+} as any)
+const CollectionsSplatRoute = CollectionsSplatRouteImport.update({
+  id: '/collections/$',
+  path: '/collections/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppSplatRoute = AppSplatRouteImport.update({
   id: '/$',
@@ -43,12 +55,16 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/$': typeof AppSplatRoute
+  '/collections/$': typeof CollectionsSplatRoute
+  '/collections/': typeof CollectionsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/explore/': typeof AppExploreIndexRoute
 }
 export interface FileRoutesByTo {
   '/$': typeof AppSplatRoute
+  '/collections/$': typeof CollectionsSplatRoute
   '/': typeof AppIndexRoute
+  '/collections': typeof CollectionsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/explore': typeof AppExploreIndexRoute
 }
@@ -56,26 +72,44 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
   '/_app/$': typeof AppSplatRoute
+  '/collections/$': typeof CollectionsSplatRoute
   '/_app/': typeof AppIndexRoute
+  '/collections/': typeof CollectionsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_app/explore/': typeof AppExploreIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$' | '/api/auth/$' | '/explore/'
+  fullPaths:
+    | '/'
+    | '/$'
+    | '/collections/$'
+    | '/collections/'
+    | '/api/auth/$'
+    | '/explore/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$' | '/' | '/api/auth/$' | '/explore'
+  to:
+    | '/$'
+    | '/collections/$'
+    | '/'
+    | '/collections'
+    | '/api/auth/$'
+    | '/explore'
   id:
     | '__root__'
     | '/_app'
     | '/_app/$'
+    | '/collections/$'
     | '/_app/'
+    | '/collections/'
     | '/api/auth/$'
     | '/_app/explore/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
+  CollectionsSplatRoute: typeof CollectionsSplatRoute
+  CollectionsIndexRoute: typeof CollectionsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -88,12 +122,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/collections/': {
+      id: '/collections/'
+      path: '/collections'
+      fullPath: '/collections/'
+      preLoaderRoute: typeof CollectionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/': {
       id: '/_app/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
+    }
+    '/collections/$': {
+      id: '/collections/$'
+      path: '/collections/$'
+      fullPath: '/collections/$'
+      preLoaderRoute: typeof CollectionsSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/$': {
       id: '/_app/$'
@@ -137,6 +185,8 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
+  CollectionsSplatRoute: CollectionsSplatRoute,
+  CollectionsIndexRoute: CollectionsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
