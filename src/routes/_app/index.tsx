@@ -11,51 +11,28 @@ import {
 import { Input } from "#/components/ui/input"
 import { useHeaderStore } from "#/lib/header-store"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { File02Icon, FilterIcon } from "@hugeicons/core-free-icons"
+import { File02Icon, FilterIcon, SearchIcon } from "@hugeicons/core-free-icons"
 
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { cn } from "#/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "#/components/ui/dropdown-menu"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group"
 
 export const Route = createFileRoute("/_app/")({ component: Home })
 
 function Home() {
-  const setRightSlot = useHeaderStore((s) => s.setRightSlot)
   const [currentFilter, setCurrentFilter] = useState<
     "all" | "created" | "saved"
   >("all")
-
-  // useEffect(() => {
-  //   setRightSlot(
-  //     <>
-  //       <Button
-  //         size="sm"
-  //         variant={currentFilter === "all" ? "default" : "secondary"}
-  //         onClick={() => setCurrentFilter("all")}
-  //         className="rounded-full! px-3"
-  //       >
-  //         All
-  //       </Button>
-  //       <Button
-  //         size="sm"
-  //         variant={currentFilter === "created" ? "default" : "secondary"}
-  //         onClick={() => setCurrentFilter("created")}
-  //         className="rounded-full! px-3"
-  //       >
-  //         Created
-  //       </Button>
-  //       <Button
-  //         size="sm"
-  //         variant={currentFilter === "saved" ? "default" : "secondary"}
-  //         onClick={() => setCurrentFilter("saved")}
-  //         className="rounded-full! px-3"
-  //       >
-  //         Saved
-  //       </Button>
-  //     </>,
-  //   )
-  //   return () => setRightSlot(null) // cleanup on unmount
-  // }, [currentFilter])
 
   const data = [
     {
@@ -107,16 +84,38 @@ function Home() {
 
   return (
     <>
-      <section className="flex-between gap-2">
-        <Input
+			<section className="flex-between gap-2">
+				<InputGroup className="h-10 w-full">
+					<InputGroupAddon><HugeiconsIcon icon={SearchIcon} /></InputGroupAddon>  {/* className="size-6!" */}
+        <InputGroupInput
           placeholder="Search collections and tags"
-          className="h-11 w-full"
         />
-        <Button variant="ghost" size="lg">
-          <HugeiconsIcon icon={FilterIcon} className="size-6!" />
-        </Button>
+				</InputGroup>
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="ghost" size="lg" />}>
+            <HugeiconsIcon icon={FilterIcon} className="size-6!" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Filter list</DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={currentFilter}
+                onValueChange={setCurrentFilter}
+                defaultValue="all"
+              >
+                <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="created">
+                  Created
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="saved">
+                  Saved
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </section>
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {data.map((item, index) => (
           <Card size="sm" key={index} className="pt-0!">
             <Link to="/collections/ddfji" className="contents">
