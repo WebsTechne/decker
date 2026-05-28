@@ -1,9 +1,10 @@
-import type { useForm } from "@tanstack/react-form"
-import { Field } from "../ui/field"
+import { Field, FieldError, FieldLabel } from "../ui/field"
 import { Button } from "../ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons"
 import type { SignUpForm } from "#/routes/auth/sign-up"
+import { z } from "zod"
+import { DropZone } from "./drop-zone"
 
 export function AvatarStep({
   form,
@@ -16,6 +17,23 @@ export function AvatarStep({
 }) {
   return (
     <>
+      <form.Field
+        name="email"
+        validators={{
+          onSubmit: z.string().email("Invalid email"),
+        }}
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid
+          return (
+            <Field data-invalid={isInvalid} className="gap-1">
+              <DropZone />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          )
+        }}
+      />
+
       <Field orientation="horizontal" className="gap-5">
         <Button
           type="button"

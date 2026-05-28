@@ -73,6 +73,12 @@ export function AccountStep({
                 autoComplete="email"
                 className="h-10"
                 type="email"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault()
+                    onNextAction()
+                  }
+                }}
               />
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
@@ -108,6 +114,12 @@ export function AccountStep({
                   aria-invalid={isInvalid}
                   placeholder="user.name_"
                   autoComplete="off"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      onNextAction()
+                    }
+                  }}
                 />
                 <Tooltip>
                   <TooltipTrigger
@@ -151,6 +163,12 @@ export function AccountStep({
                   placeholder="********"
                   autoComplete="new-password"
                   type={!view ? "password" : "text"}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      onNextAction()
+                    }
+                  }}
                 />
                 <InputGroupButton onClick={() => setView(!view)}>
                   <HugeiconsIcon
@@ -190,6 +208,12 @@ export function AccountStep({
                   placeholder="********"
                   autoComplete="new-password"
                   type={!confirmView ? "password" : "text"}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      onNextAction()
+                    }
+                  }}
                 />
                 <InputGroupButton onClick={() => setConfirmView(!confirmView)}>
                   <HugeiconsIcon

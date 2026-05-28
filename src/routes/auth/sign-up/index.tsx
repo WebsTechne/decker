@@ -6,6 +6,7 @@ import { ProfileStep } from "#/components/form/profile-step"
 import { AvatarStep } from "#/components/form/avatar-step"
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -17,6 +18,7 @@ import { cn } from "#/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Tick02Icon } from "@hugeicons/core-free-icons"
 import { z } from "zod"
+import { Button } from "#/components/ui/button"
 
 export const Route = createFileRoute("/auth/sign-up/")({
   component: SignUp,
@@ -123,6 +125,12 @@ function SignUp() {
 
       <Card size="sm" className="py-6! sm:max-w-md">
         <CardHeader>
+          <CardAction>
+            <Button variant="link" className="h-max! px-0! py-0!">
+              Skip
+            </Button>
+          </CardAction>
+
           <CardTitle className="text-lg! font-bold">
             Sign Up to Decker
           </CardTitle>

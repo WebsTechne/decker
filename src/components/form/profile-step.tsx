@@ -15,6 +15,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "../ui/combobox"
+import { Spinner } from "../ui/spinner"
 
 export function ProfileStep({
   form,
@@ -67,10 +68,17 @@ export function ProfileStep({
                 value={schools.find((s) => s.id === field.state.value) ?? null}
                 itemToStringLabel={(item) => item.name}
                 onValueChange={(item) => field.handleChange(item?.id ?? "")}
+                autoHighlight
               >
                 <ComboboxInput
                   placeholder="Enter you school's full name"
                   showClear={true}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      onNextAction()
+                    }
+                  }}
                 />
                 <ComboboxContent>
                   <ComboboxEmpty>
@@ -79,10 +87,16 @@ export function ProfileStep({
                     </Button>
                   </ComboboxEmpty>
                   <ComboboxList>
-                    {(item) => (
-                      <ComboboxItem key={item.id} value={item}>
-                        {item.name}
-                      </ComboboxItem>
+                    {isLoadingSchools ? (
+                      <div className="flex-center h-25 w-full">
+                        <Spinner />
+                      </div>
+                    ) : (
+                      (item) => (
+                        <ComboboxItem key={item.id} value={item}>
+                          {item.name}
+                        </ComboboxItem>
+                      )
                     )}
                   </ComboboxList>
                 </ComboboxContent>
@@ -109,10 +123,17 @@ export function ProfileStep({
                 value={departments.find((d) => d.id === field.state.value)}
                 itemToStringLabel={(item) => item.name}
                 onValueChange={(item) => field.handleChange(item?.id ?? "")}
+                autoHighlight
               >
                 <ComboboxInput
                   placeholder="Enter you department"
                   showClear={true}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      onNextAction()
+                    }
+                  }}
                 />
                 <ComboboxContent>
                   <ComboboxEmpty>
