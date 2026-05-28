@@ -1,7 +1,7 @@
 import type { JSX } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { useRouteContext } from "@tanstack/react-router"
-import type { ServerSession } from "#/routes/__root"
+import { useRouteContext, Link } from "@tanstack/react-router"
+import type { ServerSession } from "#/lib/types"
 import { useHeaderStore } from "#/lib/header-store"
 import { Button } from "../ui/button"
 import { useTheme } from "../theme-provider"
@@ -9,9 +9,13 @@ import { useTheme } from "../theme-provider"
 function AvatarBtn({ session }: { session: ServerSession }) {
   if (!session)
     return (
-      <Avatar>
-        <AvatarFallback>U</AvatarFallback>
-      </Avatar>
+      <Button
+        size="sm"
+        nativeButton={false}
+        render={<Link to="/auth/sign-up" />}
+      >
+        Sign in
+      </Button>
     )
 
   const { username, image } = session.user

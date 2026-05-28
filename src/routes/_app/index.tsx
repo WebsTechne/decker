@@ -8,8 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "#/components/ui/card"
-import { Input } from "#/components/ui/input"
-import { useHeaderStore } from "#/lib/header-store"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { File02Icon, FilterIcon, SearchIcon } from "@hugeicons/core-free-icons"
 
@@ -25,7 +23,11 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu"
-import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "#/components/ui/input-group"
 
 export const Route = createFileRoute("/_app/")({ component: Home })
 
@@ -49,7 +51,7 @@ function Home() {
       name: "CSC203 - Destructuring variables",
       description:
         "afnaif awidfjwdif jarifuoh adiuhawdufg asdgfowdf awdgofuadgo faud ohgaiod g dofgasod fgaod gfaiodfadfg",
-      tags: ["COS203", "self-made", "science"],
+      tags: ["COS203", "self-made"],
       pages: 3,
       type: "created",
     },
@@ -58,7 +60,7 @@ function Home() {
       name: "CSC203 - Destructuring variables",
       description:
         "afnaif awidfjwdif jarifuoh adiuhawdufg asdgfowdf awdgofuadgo faud ohgaiod g dofgasod fgaod gfaiodfadfg",
-      tags: ["COS203", "self-made", "science"],
+      tags: ["COS203", "self-made", "science", "creative"],
       pages: 5,
       type: "saved",
     },
@@ -67,7 +69,7 @@ function Home() {
       name: "CSC203 - Destructuring variables",
       description:
         "afnaif awidfjwdif jarifuoh adiuhawdufg asdgfowdf awdgofuadgo faud ohgaiod g dofgasod fgaod gfaiodfadfg",
-      tags: ["COS203", "self-made", "science"],
+      tags: ["COS203", "self-made", "science", "x", "y"],
       pages: 27,
       type: "created",
     },
@@ -76,7 +78,7 @@ function Home() {
       name: "CSC203 - Destructuring variables",
       description:
         "afnaif awidfjwdif jarifuoh adiuhawdufg asdgfowdf awdgofuadgo faud ohgaiod g dofgasod fgaod gfaiodfadfg",
-      tags: ["COS203", "self-made", "science"],
+      tags: ["COS203", "self-made", "science", "x", "y", "z"],
       pages: 1,
       type: "saved",
     },
@@ -84,15 +86,17 @@ function Home() {
 
   return (
     <>
-			<section className="flex-between gap-2">
-				<InputGroup className="h-10 w-full">
-					<InputGroupAddon><HugeiconsIcon icon={SearchIcon} /></InputGroupAddon>  {/* className="size-6!" */}
-        <InputGroupInput
-          placeholder="Search collections and tags"
-        />
-				</InputGroup>
+      <section className="flex-between gap-2">
+        <InputGroup className="h-10 w-full">
+          <InputGroupAddon>
+            <HugeiconsIcon icon={SearchIcon} className="size-5!" />
+          </InputGroupAddon>
+          <InputGroupInput placeholder="Search collections and tags" />
+        </InputGroup>
         <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" size="lg" />}>
+          <DropdownMenuTrigger
+            render={<Button variant="ghost" size="lg" className="px-1!" />}
+          >
             <HugeiconsIcon icon={FilterIcon} className="size-6!" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -126,19 +130,37 @@ function Home() {
                 />
                 <Badge
                   className={cn(
-                    "absolute top-2 right-2",
-                    item.type === "saved" ? "text-background bg-amber-500" : "",
+                    "text-foreground dark:text-background absolute top-2 right-2",
+                    item.type === "saved" ? "bg-amber-300" : "bg-blue-300",
                   )}
                 >
                   {item.type}
                 </Badge>
               </div>
             </Link>
-            <CardHeader>
+            <CardHeader className="gap-2">
               <CardTitle className="flex items-center gap-1">
                 {item.name}
               </CardTitle>
               <CardDescription className="flex items-center gap-2">
+                {item.tags.slice(0, 3).map((tag, tagIndex) => (
+                  <Badge
+                    key={`${tag}-${tagIndex}`}
+                    className="h-max px-2 py-1 text-xs"
+                    variant="secondary"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+                {item.tags.length > 3 && (
+                  <Badge className="h-max py-1 text-xs" variant="outline">
+                    +{item.tags.length - 3}
+                  </Badge>
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-between py-0!">
+              <div className="flex flex-1 items-center gap-1 overflow-x-hidden">
                 <Avatar className="size-7">
                   <AvatarImage src={""} alt={item.author} />
                   <AvatarFallback>
@@ -146,23 +168,6 @@ function Home() {
                   </AvatarFallback>
                 </Avatar>
                 <span className="flex-1 truncate">{item.author}</span>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-between py-0!">
-              <div className="flex flex-1 items-center gap-1 overflow-x-hidden">
-                {item.tags.slice(0, 2).map((tag, tagIndex) => (
-                  <span
-                    key={`${tag}-${tagIndex}`}
-                    className="rounded-full bg-blue-500/30 px-2 py-1 text-xs text-blue-500"
-                  >
-                    {tag}
-                  </span>
-                ))}
-                {item.tags.length > 2 && (
-                  <Badge className="h-max px-2 py-1 text-xs" variant="outline">
-                    +{item.tags.length - 2}
-                  </Badge>
-                )}
               </div>
 
               <div className="flex-center text-muted-foreground gap-1 text-xs sm:text-sm">

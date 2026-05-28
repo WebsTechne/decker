@@ -9,14 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as CollectionsIndexRouteImport } from './routes/collections/index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as CollectionsSplatRouteImport } from './routes/collections/$'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
+import { Route as AuthSignUpIndexRouteImport } from './routes/auth/sign-up/index'
 import { Route as AppExploreIndexRouteImport } from './routes/_app/explore/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -41,6 +48,11 @@ const AppSplatRoute = AppSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AuthSignUpIndexRoute = AuthSignUpIndexRouteImport.update({
+  id: '/sign-up/',
+  path: '/sign-up/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 const AppExploreIndexRoute = AppExploreIndexRouteImport.update({
   id: '/explore/',
   path: '/explore/',
@@ -54,60 +66,73 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/$': typeof AppSplatRoute
   '/collections/$': typeof CollectionsSplatRoute
   '/collections/': typeof CollectionsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/explore/': typeof AppExploreIndexRoute
+  '/auth/sign-up/': typeof AuthSignUpIndexRoute
 }
 export interface FileRoutesByTo {
+  '/auth': typeof AuthRouteRouteWithChildren
   '/$': typeof AppSplatRoute
   '/collections/$': typeof CollectionsSplatRoute
   '/': typeof AppIndexRoute
   '/collections': typeof CollectionsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/explore': typeof AppExploreIndexRoute
+  '/auth/sign-up': typeof AuthSignUpIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
+  '/auth': typeof AuthRouteRouteWithChildren
   '/_app/$': typeof AppSplatRoute
   '/collections/$': typeof CollectionsSplatRoute
   '/_app/': typeof AppIndexRoute
   '/collections/': typeof CollectionsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_app/explore/': typeof AppExploreIndexRoute
+  '/auth/sign-up/': typeof AuthSignUpIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/$'
     | '/collections/$'
     | '/collections/'
     | '/api/auth/$'
     | '/explore/'
+    | '/auth/sign-up/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/auth'
     | '/$'
     | '/collections/$'
     | '/'
     | '/collections'
     | '/api/auth/$'
     | '/explore'
+    | '/auth/sign-up'
   id:
     | '__root__'
     | '/_app'
+    | '/auth'
     | '/_app/$'
     | '/collections/$'
     | '/_app/'
     | '/collections/'
     | '/api/auth/$'
     | '/_app/explore/'
+    | '/auth/sign-up/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
   CollectionsSplatRoute: typeof CollectionsSplatRoute
   CollectionsIndexRoute: typeof CollectionsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -115,6 +140,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -150,6 +182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSplatRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/auth/sign-up/': {
+      id: '/auth/sign-up/'
+      path: '/sign-up'
+      fullPath: '/auth/sign-up/'
+      preLoaderRoute: typeof AuthSignUpIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
     '/_app/explore/': {
       id: '/_app/explore/'
       path: '/explore'
@@ -183,8 +222,21 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
   AppRouteRouteChildren,
 )
 
+interface AuthRouteRouteChildren {
+  AuthSignUpIndexRoute: typeof AuthSignUpIndexRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthSignUpIndexRoute: AuthSignUpIndexRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
   CollectionsSplatRoute: CollectionsSplatRoute,
   CollectionsIndexRoute: CollectionsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

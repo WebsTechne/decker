@@ -33,6 +33,7 @@ body {
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(0.97 0 0);
+  --muted: oklch(0.938 0.0013 106.42);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
@@ -135,10 +136,15 @@ body {
 
 @layer base {
   ::selection {
-    @apply text-primary bg-primary/20 dark:bg-blue-200/10;
+    @apply text-primary bg-primary/20;
   }
+
+  .dark ::selection {
+    @apply text-foreground bg-primary/50;
+  }
+
   * {
-    @apply border-border outline-ring/50 caret-primary;
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground font-sans;

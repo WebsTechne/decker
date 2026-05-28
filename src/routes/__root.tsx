@@ -10,10 +10,9 @@ import TanStackQueryDevtools from "../integrations/tanstack-query/devtools"
 
 import appCss from "../styles.css?url"
 
-import type { QueryClient } from "@tanstack/react-query"
-import type { auth } from "#/lib/auth"
 import { ThemeProvider } from "#/components/theme-provider"
 import { TooltipProvider } from "#/components/ui/tooltip"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -43,7 +42,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
 })
 
-export type ServerSession = typeof auth.$Infer.Session | null
+const queryClient = new QueryClient()
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -53,7 +52,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider defaultTheme="system" storageKey="theme">
-          <TooltipProvider> {children}</TooltipProvider>
+					<TooltipProvider>  <QueryClientProvider client={queryClient}>
+						{children}
+          </QueryClientProvider></TooltipProvider>
         </ThemeProvider>
         <TanStackDevtools
           config={{
