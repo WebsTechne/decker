@@ -1,9 +1,8 @@
-import { Field, FieldError, FieldLabel } from "../ui/field"
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field"
 import { Button } from "../ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons"
 import type { SignUpForm } from "#/routes/auth/sign-up"
-import { z } from "zod"
 import { DropZone } from "./drop-zone"
 
 export function AvatarStep({
@@ -18,16 +17,19 @@ export function AvatarStep({
   return (
     <>
       <form.Field
-        name="email"
-        validators={{
-          onSubmit: z.string().email("Invalid email"),
-        }}
+        name="image"
         children={(field) => {
           const isInvalid =
             field.state.meta.isTouched && !field.state.meta.isValid
           return (
             <Field data-invalid={isInvalid} className="gap-1">
-              <DropZone />
+              <DropZone
+                onFiles={(files) => field.handleChange(files[0])}
+                preview={field.state.value}
+              />
+              <FieldDescription>
+                We recommend uploading a square image
+              </FieldDescription>
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
           )
