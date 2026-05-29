@@ -15,6 +15,7 @@ const config = defineConfig({
       "better-auth",
       "@better-auth/core",
       "@better-auth/prisma-adapter",
+      "@supabase/supabase-js",
       "kysely",
       "h3-v2",
       "jose",

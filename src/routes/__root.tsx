@@ -12,7 +12,8 @@ import appCss from "../styles.css?url"
 
 import { ThemeProvider } from "#/components/theme-provider"
 import { TooltipProvider } from "#/components/ui/tooltip"
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { Toaster } from "#/components/ui/sonner"
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -52,9 +53,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider defaultTheme="system" storageKey="theme">
-					<TooltipProvider>  <QueryClientProvider client={queryClient}>
-						{children}
-          </QueryClientProvider></TooltipProvider>
+          <TooltipProvider>
+            <QueryClientProvider client={queryClient}>
+              {children}
+            </QueryClientProvider>
+          </TooltipProvider>
+
+          <Toaster />
         </ThemeProvider>
         <TanStackDevtools
           config={{

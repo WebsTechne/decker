@@ -10,7 +10,6 @@ import {
   createFileRoute,
   Outlet,
   Link,
-  useRouterState,
   useLocation,
 } from "@tanstack/react-router"
 import { Bookmark, Bell, Search, Plus } from "lucide-react"

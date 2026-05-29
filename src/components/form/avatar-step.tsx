@@ -1,18 +1,21 @@
-import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field"
+import { Field, FieldDescription, FieldError } from "../ui/field"
 import { Button } from "../ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons"
 import type { SignUpForm } from "#/routes/auth/sign-up"
 import { DropZone } from "./drop-zone"
+import { Spinner } from "../ui/spinner"
 
 export function AvatarStep({
   form,
   onBack,
   onSubmit,
+  isSubmitting,
 }: {
   form: SignUpForm
   onBack: () => void
   onSubmit: () => void
+  isSubmitting: boolean
 }) {
   return (
     <>
@@ -25,6 +28,7 @@ export function AvatarStep({
             <Field data-invalid={isInvalid} className="gap-1">
               <DropZone
                 onFiles={(files) => field.handleChange(files[0])}
+                onClear={() => field.handleChange(undefined)}
                 preview={field.state.value}
               />
               <FieldDescription>
@@ -50,8 +54,20 @@ export function AvatarStep({
           />
           Back
         </Button>
-        <Button type="button" className="h-10 flex-1" onClick={onSubmit}>
-          Submit
+        <Button
+          type="button"
+          className="h-10 flex-1"
+          onClick={onSubmit}
+          disabled={isSubmitting}
+        >
+          {!isSubmitting ? (
+            "Submit"
+          ) : (
+            <>
+              <Spinner />
+              Submitting...
+            </>
+          )}
         </Button>
       </Field>
     </>

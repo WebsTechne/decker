@@ -22,7 +22,7 @@ function AvatarBtn({ session }: { session: ServerSession }) {
 
   return (
     <Avatar>
-      <AvatarFallback>{username.charAt(0)}</AvatarFallback>
+      <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
       <AvatarImage src={image ?? ""} alt={username} />
     </Avatar>
   )

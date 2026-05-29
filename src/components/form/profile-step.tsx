@@ -120,7 +120,9 @@ export function ProfileStep({
               <FieldLabel htmlFor={field.name}>Department</FieldLabel>
               <Combobox
                 items={departments}
-                value={departments.find((d) => d.id === field.state.value)}
+                value={
+                  departments.find((d) => d.id === field.state.value) ?? null
+                }
                 itemToStringLabel={(item) => item.name}
                 onValueChange={(item) => field.handleChange(item?.id ?? "")}
                 autoHighlight
@@ -142,10 +144,16 @@ export function ProfileStep({
                     </Button>
                   </ComboboxEmpty>
                   <ComboboxList>
-                    {(item) => (
-                      <ComboboxItem key={item.id} value={item}>
-                        {item.name}
-                      </ComboboxItem>
+                    {isLoadingDepartments ? (
+                      <div className="flex-center h-25 w-full">
+                        <Spinner />
+                      </div>
+                    ) : (
+                      (item) => (
+                        <ComboboxItem key={item.id} value={item}>
+                          {item.name}
+                        </ComboboxItem>
+                      )
                     )}
                   </ComboboxList>
                 </ComboboxContent>
