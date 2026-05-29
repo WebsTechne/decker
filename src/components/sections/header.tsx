@@ -12,7 +12,7 @@ function AvatarBtn({ session }: { session: ServerSession }) {
       <Button
         size="sm"
         nativeButton={false}
-        render={<Link to="/auth/sign-up" />}
+        render={<Link to="/auth/sign-in" />}
       >
         Sign in
       </Button>

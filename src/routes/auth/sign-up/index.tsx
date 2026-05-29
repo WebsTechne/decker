@@ -100,8 +100,6 @@ function SignUp() {
           displayUsername: value.username,
         })
 
-        console.log("signUp res:", JSON.stringify(res)) // 👈 add this
-
         if (!res.data?.user) {
           toast.dismiss("sign-up-toast")
           toast.error(res.error?.message ?? "Failed to create account") // 👈 show actual error

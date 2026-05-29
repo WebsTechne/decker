@@ -144,7 +144,7 @@ export function AccountStep({
       <form.Field
         name="password"
         validators={{
-          onSubmit: z.string().min(8, "Password must be at least 8 characters"),
+          onSubmit: z.string().min(6, "Password must be at least 6 characters"),
         }}
         children={(field) => {
           const isInvalid =
