@@ -186,7 +186,7 @@ function SignIn() {
 
               <Field>
                 <Button
-                  type="submit"
+                  type="button"
                   className="h-10"
                   onClick={() => form.handleSubmit()}
                 >

@@ -1,12 +1,24 @@
 import type { JSX } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { useRouteContext, Link } from "@tanstack/react-router"
+import { useRouteContext, Link, useNavigate } from "@tanstack/react-router"
 import type { ServerSession } from "#/lib/types"
 import { useHeaderStore } from "#/lib/header-store"
 import { Button } from "../ui/button"
 import { useTheme } from "../theme-provider"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { LogoutSquare01Icon, UserCircleIcon } from "@hugeicons/core-free-icons"
+import { authClient } from "#/lib/auth-client"
+import { toast } from "sonner"
 
 function AvatarBtn({ session }: { session: ServerSession }) {
+  const navigate = useNavigate()
+
   if (!session)
     return (
       <Button
@@ -18,13 +30,41 @@ function AvatarBtn({ session }: { session: ServerSession }) {
       </Button>
     )
 
+  const handleSignout = async () => {
+    try {
+      const res = await authClient.signOut()
+      if (res.error) {
+        toast.error("Failed to sign out")
+        // throw new Error(res.error.message)
+      }
+      navigate({ to: "/auth/sign-in" })
+    } catch (err) {
+      toast.error("Failed to sign out")
+    }
+  }
+
   const { username, image } = session.user
 
   return (
-    <Avatar>
-      <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
-      <AvatarImage src={image ?? ""} alt={username} />
-    </Avatar>
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        nativeButton={false}
+        render={<Avatar className="cursor-pointer" />}
+      >
+        <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
+        <AvatarImage src={image ?? ""} alt={username} />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent sideOffset={10} className="min-w-37.5">
+        <DropdownMenuItem render={<Link to="/profile" />}>
+          <HugeiconsIcon icon={UserCircleIcon} strokeWidth={2} />
+          Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem variant="destructive" onClick={handleSignout}>
+          <HugeiconsIcon icon={LogoutSquare01Icon} strokeWidth={2} />
+          Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
