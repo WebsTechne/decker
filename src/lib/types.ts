@@ -1,3 +1,4 @@
 import type { auth } from "./auth"
+import type { authClient } from "./auth-client"
 
-export type ServerSession = typeof auth.$Infer.Session | null
+export type ServerSession = typeof authClient.$Infer.Session | null

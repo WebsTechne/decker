@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-// @ts-ignore
+// @ts-ignore keeps the type checker happy
 import { useForm, type ReactFormExtendedApi } from "@tanstack/react-form"
 import { useState } from "react"
 import {
@@ -15,7 +15,6 @@ import {
   FieldLabel,
   FieldError,
 } from "#/components/ui/field"
-import { cn } from "#/lib/utils"
 import { z } from "zod"
 import { Spinner } from "#/components/ui/spinner"
 import { Button } from "#/components/ui/button"
@@ -41,6 +40,8 @@ const formSchema = z.object({
 
 function SignIn() {
   const navigate = useNavigate()
+  const search = Route.useSearch()
+
   const [error, setError] = useState("")
   const [view, setView] = useState(false)
 
@@ -90,7 +91,7 @@ function SignIn() {
 
         toast.dismiss("sign-in-toast")
         toast.success("Sign in successful")
-        navigate({ to: "/" })
+        navigate({ to: (search as any).redirect ?? "/" })
       } catch (err) {
         console.error(err)
         toast.dismiss("sign-in-toast")
@@ -131,7 +132,7 @@ function SignIn() {
                       </FieldLabel>
                       <Input
                         id={field.name}
-                        name={field.name}
+                        name="username"
                         type="text"
                         value={field.state.value}
                         onBlur={field.handleBlur}

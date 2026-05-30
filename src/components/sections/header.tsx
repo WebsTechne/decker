@@ -1,6 +1,6 @@
 import type { JSX } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { useRouteContext, Link, useNavigate } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import type { ServerSession } from "#/lib/types"
 import { useHeaderStore } from "#/lib/header-store"
 import { Button } from "../ui/button"
@@ -51,15 +51,23 @@ function AvatarBtn({ session }: { session: ServerSession }) {
         nativeButton={false}
         render={<Avatar className="cursor-pointer" />}
       >
-        <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
-        <AvatarImage src={image ?? ""} alt={username} />
+        <AvatarFallback>
+          {(username ?? "").charAt(0).toUpperCase()}
+        </AvatarFallback>
+        <AvatarImage src={image ?? ""} alt={username ?? ""} />
       </DropdownMenuTrigger>
       <DropdownMenuContent sideOffset={10} className="min-w-37.5">
-        <DropdownMenuItem render={<Link to="/profile" />}>
+        <DropdownMenuItem
+          render={<Link to="/profile" className="cursor-pointer" />}
+        >
           <HugeiconsIcon icon={UserCircleIcon} strokeWidth={2} />
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem variant="destructive" onClick={handleSignout}>
+        <DropdownMenuItem
+          variant="destructive"
+          className="cursor-pointer"
+          onClick={handleSignout}
+        >
           <HugeiconsIcon icon={LogoutSquare01Icon} strokeWidth={2} />
           Sign out
         </DropdownMenuItem>
@@ -69,7 +77,7 @@ function AvatarBtn({ session }: { session: ServerSession }) {
 }
 
 export function Header(): JSX.Element {
-  const { session } = useRouteContext({ from: "/_app" })
+  const { data: session } = authClient.useSession()
   const { rightSlot } = useHeaderStore()
   const { resolvedTheme: theme, setTheme } = useTheme()
 

@@ -1,4 +1,5 @@
 import { Header } from "#/components/sections/header"
+import { Spinner } from "#/components/ui/spinner"
 import {
   Tooltip,
   TooltipContent,
@@ -11,14 +12,24 @@ import {
   Outlet,
   Link,
   useLocation,
+  redirect,
 } from "@tanstack/react-router"
 import { Bookmark, Bell, Search, Plus } from "lucide-react"
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
-  beforeLoad: async () => {
-    const session = await getSession()
-    return { session }
+  pendingComponent: () => (
+    <div className="flex-center h-dvh">
+      <Spinner />
+    </div>
+  ),
+  pendingMs: 300, // only show pending if it takes more than 300ms
+  beforeLoad: async ({ context, location }) => {
+    if (!context.session)
+      throw redirect({
+        to: "/auth/sign-in",
+        search: { redirect: location.href },
+      })
   },
 })
 

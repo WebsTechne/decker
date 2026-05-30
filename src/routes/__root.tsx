@@ -14,6 +14,7 @@ import { ThemeProvider } from "#/components/theme-provider"
 import { TooltipProvider } from "#/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Toaster } from "#/components/ui/sonner"
+import { getSession } from "#/lib/auth-session"
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -41,6 +42,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   shellComponent: RootDocument,
+  beforeLoad: async () => {
+    const session = await getSession()
+    return { session }
+  },
 })
 
 const queryClient = new QueryClient()

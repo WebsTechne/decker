@@ -11,9 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
+import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as CollectionsIndexRouteImport } from './routes/collections/index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as CollectionsSplatRouteImport } from './routes/collections/$'
+import { Route as CollectionsCollectionIdRouteImport } from './routes/collections/$collectionId'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AuthSignUpIndexRouteImport } from './routes/auth/sign-up/index'
 import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index'
@@ -29,6 +30,11 @@ const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileIndexRoute = ProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollectionsIndexRoute = CollectionsIndexRouteImport.update({
   id: '/collections/',
   path: '/collections/',
@@ -39,9 +45,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const CollectionsSplatRoute = CollectionsSplatRouteImport.update({
-  id: '/collections/$',
-  path: '/collections/$',
+const CollectionsCollectionIdRoute = CollectionsCollectionIdRouteImport.update({
+  id: '/collections/$collectionId',
+  path: '/collections/$collectionId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSplatRoute = AppSplatRouteImport.update({
@@ -74,8 +80,9 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/$': typeof AppSplatRoute
-  '/collections/$': typeof CollectionsSplatRoute
+  '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/collections/': typeof CollectionsIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/explore/': typeof AppExploreIndexRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
@@ -84,9 +91,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
   '/$': typeof AppSplatRoute
-  '/collections/$': typeof CollectionsSplatRoute
+  '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/': typeof AppIndexRoute
   '/collections': typeof CollectionsIndexRoute
+  '/profile': typeof ProfileIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/explore': typeof AppExploreIndexRoute
   '/auth/sign-in': typeof AuthSignInIndexRoute
@@ -97,9 +105,10 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
   '/_app/$': typeof AppSplatRoute
-  '/collections/$': typeof CollectionsSplatRoute
+  '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/_app/': typeof AppIndexRoute
   '/collections/': typeof CollectionsIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_app/explore/': typeof AppExploreIndexRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
@@ -111,8 +120,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/$'
-    | '/collections/$'
+    | '/collections/$collectionId'
     | '/collections/'
+    | '/profile/'
     | '/api/auth/$'
     | '/explore/'
     | '/auth/sign-in/'
@@ -121,9 +131,10 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/$'
-    | '/collections/$'
+    | '/collections/$collectionId'
     | '/'
     | '/collections'
+    | '/profile'
     | '/api/auth/$'
     | '/explore'
     | '/auth/sign-in'
@@ -133,9 +144,10 @@ export interface FileRouteTypes {
     | '/_app'
     | '/auth'
     | '/_app/$'
-    | '/collections/$'
+    | '/collections/$collectionId'
     | '/_app/'
     | '/collections/'
+    | '/profile/'
     | '/api/auth/$'
     | '/_app/explore/'
     | '/auth/sign-in/'
@@ -145,8 +157,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
-  CollectionsSplatRoute: typeof CollectionsSplatRoute
+  CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   CollectionsIndexRoute: typeof CollectionsIndexRoute
+  ProfileIndexRoute: typeof ProfileIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/': {
+      id: '/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/collections/': {
       id: '/collections/'
       path: '/collections'
@@ -180,11 +200,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/collections/$': {
-      id: '/collections/$'
-      path: '/collections/$'
-      fullPath: '/collections/$'
-      preLoaderRoute: typeof CollectionsSplatRouteImport
+    '/collections/$collectionId': {
+      id: '/collections/$collectionId'
+      path: '/collections/$collectionId'
+      fullPath: '/collections/$collectionId'
+      preLoaderRoute: typeof CollectionsCollectionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/$': {
@@ -258,8 +278,9 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRouteWithChildren,
-  CollectionsSplatRoute: CollectionsSplatRoute,
+  CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   CollectionsIndexRoute: CollectionsIndexRoute,
+  ProfileIndexRoute: ProfileIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
