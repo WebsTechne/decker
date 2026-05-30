@@ -1,8 +1,14 @@
 import { cn } from "#/lib/utils"
-import { Cancel01Icon } from "@hugeicons/core-free-icons"
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Cancel01Icon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useId, useMemo, useState } from "react"
 import { ScrollArea, ScrollBar } from "../ui/scroll-area"
+import { Button } from "../ui/button"
+import { toast } from "sonner"
 
 function DropZone({
   onFiles,
@@ -16,8 +22,12 @@ function DropZone({
   multiple?: boolean
 }) {
   const inputId = useId()
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [dragging, setDragging] = useState(false)
   const [files, setFiles] = useState<File[]>([])
+
+  const MAX_SIZE_MB = 6
+  const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
 
   const previewUrl = useMemo(
     () => (preview ? URL.createObjectURL(preview) : null),
@@ -30,6 +40,23 @@ function DropZone({
   )
 
   const addFiles = (incoming: File[]) => {
+    const imageFiles = incoming.filter((f) => f.type.startsWith("image/"))
+
+    const oversized = imageFiles.filter((f) => f.size > MAX_SIZE_BYTES)
+    const validFiles = imageFiles.filter((f) => f.size <= MAX_SIZE_BYTES)
+
+    if (oversized.length > 0) {
+      toast.warning(
+        `${oversized.length} file${oversized.length > 1 ? "s" : ""} skipped — max size is ${MAX_SIZE_MB}MB per image`,
+      )
+    }
+
+    if (imageFiles.length !== incoming.length) {
+      toast.warning("Only image files are accepted")
+    }
+
+    if (validFiles.length === 0) return
+
     const updated = multiple ? [...files, ...incoming] : incoming
     setFiles(updated)
     onFiles(updated)
@@ -50,6 +77,8 @@ function DropZone({
             src={previewUrl}
             alt="preview"
             className="h-40 rounded-md object-contain"
+            draggable={false}
+            onClick={() => setLightboxIndex(0)}
           />
           <span
             onClick={(e) => {
@@ -66,17 +95,25 @@ function DropZone({
       {/* Multiple preview grid */}
       {multiple && files.length > 0 && (
         <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-4">
-            {files.map((file, i) => (
-              <div key={fileUrls[i]} className="relative h-40 w-max shrink-0">
+          <div className="flex cursor-pointer gap-4">
+            {files.map((_file, i) => (
+              <div
+                key={fileUrls[i]}
+                className="relative h-40 w-max shrink-0"
+                onClick={() => setLightboxIndex(i)}
+              >
                 <img
                   src={fileUrls[i]}
                   alt={`page ${i + 1}`}
                   className="h-full w-auto rounded-lg object-cover"
+                  draggable={false}
                 />
                 <button
                   type="button"
-                  onClick={() => removeFile(i)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    removeFile(i)
+                  }}
                   className="flex-center absolute top-1 right-1 size-5 rounded-full bg-black/60 text-white"
                 >
                   <HugeiconsIcon icon={Cancel01Icon} size={12} />
@@ -89,6 +126,62 @@ function DropZone({
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
+      )}
+
+      {/* Lightbox */}
+      {lightboxIndex !== null && (
+        <div
+          className="fixed inset-0 z-9999 flex items-center justify-center bg-black/80"
+          onClick={() => setLightboxIndex(null)}
+        >
+          <img
+            src={multiple ? fileUrls[lightboxIndex] : previewUrl!}
+            alt={`page ${lightboxIndex + 1}`}
+            className="max-h-[90dvh] max-w-[90dvw] rounded-lg object-contain"
+            onClick={(e) => e.stopPropagation()}
+            draggable={false}
+          />
+          {/* prev/next */}
+          {multiple && (
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute top-1/2 left-1 -translate-y-1/2 disabled:pointer-events-auto! md:left-4"
+              disabled={!(lightboxIndex > 0)}
+              onClick={(e) => {
+                e.stopPropagation()
+                setLightboxIndex(lightboxIndex - 1)
+              }}
+            >
+              <HugeiconsIcon
+                icon={ArrowLeft01Icon}
+                className="size-5!"
+                strokeWidth={2}
+              />
+            </Button>
+          )}
+          {multiple && (
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute top-1/2 right-1 -translate-y-1/2 disabled:pointer-events-auto! md:right-4"
+              disabled={!(lightboxIndex < files.length - 1)}
+              onClick={(e) => {
+                e.stopPropagation()
+                setLightboxIndex(lightboxIndex + 1)
+              }}
+            >
+              <HugeiconsIcon
+                icon={ArrowRight01Icon}
+                className="size-5!"
+                strokeWidth={2}
+              />
+            </Button>
+          )}
+          <span className="absolute bottom-4 text-sm text-white">
+            {lightboxIndex + 1} / {files.length}
+          </span>
+        </div>
       )}
 
       {/* Drop Zone */}

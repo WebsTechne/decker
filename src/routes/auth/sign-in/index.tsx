@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-// @ts-ignore keeps the type checker happy
 import { useForm, type ReactFormExtendedApi } from "@tanstack/react-form"
 import { useState } from "react"
 import {

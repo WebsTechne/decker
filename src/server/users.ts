@@ -20,6 +20,7 @@ const updateUserProfile = createServerFn({ method: "POST" })
       },
     })
   })
+
 const deleteUser = createServerFn({ method: "POST" })
   .inputValidator((data: { userId: string }) => data)
   .handler(async ({ data }) => {

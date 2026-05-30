@@ -18,6 +18,7 @@ import { Route as CollectionsCollectionIdRouteImport } from './routes/collection
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AuthSignUpIndexRouteImport } from './routes/auth/sign-up/index'
 import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index'
+import { Route as AppUploadIndexRouteImport } from './routes/_app/upload/index'
 import { Route as AppExploreIndexRouteImport } from './routes/_app/explore/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -65,6 +66,11 @@ const AuthSignInIndexRoute = AuthSignInIndexRouteImport.update({
   path: '/sign-in/',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AppUploadIndexRoute = AppUploadIndexRouteImport.update({
+  id: '/upload/',
+  path: '/upload/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppExploreIndexRoute = AppExploreIndexRouteImport.update({
   id: '/explore/',
   path: '/explore/',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/profile/': typeof ProfileIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/explore/': typeof AppExploreIndexRoute
+  '/upload/': typeof AppUploadIndexRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
   '/auth/sign-up/': typeof AuthSignUpIndexRoute
 }
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/explore': typeof AppExploreIndexRoute
+  '/upload': typeof AppUploadIndexRoute
   '/auth/sign-in': typeof AuthSignInIndexRoute
   '/auth/sign-up': typeof AuthSignUpIndexRoute
 }
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/profile/': typeof ProfileIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_app/explore/': typeof AppExploreIndexRoute
+  '/_app/upload/': typeof AppUploadIndexRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
   '/auth/sign-up/': typeof AuthSignUpIndexRoute
 }
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/profile/'
     | '/api/auth/$'
     | '/explore/'
+    | '/upload/'
     | '/auth/sign-in/'
     | '/auth/sign-up/'
   fileRoutesByTo: FileRoutesByTo
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/api/auth/$'
     | '/explore'
+    | '/upload'
     | '/auth/sign-in'
     | '/auth/sign-up'
   id:
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/profile/'
     | '/api/auth/$'
     | '/_app/explore/'
+    | '/_app/upload/'
     | '/auth/sign-in/'
     | '/auth/sign-up/'
   fileRoutesById: FileRoutesById
@@ -228,6 +240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInIndexRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_app/upload/': {
+      id: '/_app/upload/'
+      path: '/upload'
+      fullPath: '/upload/'
+      preLoaderRoute: typeof AppUploadIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/explore/': {
       id: '/_app/explore/'
       path: '/explore'
@@ -249,12 +268,14 @@ interface AppRouteRouteChildren {
   AppSplatRoute: typeof AppSplatRoute
   AppIndexRoute: typeof AppIndexRoute
   AppExploreIndexRoute: typeof AppExploreIndexRoute
+  AppUploadIndexRoute: typeof AppUploadIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppSplatRoute: AppSplatRoute,
   AppIndexRoute: AppIndexRoute,
   AppExploreIndexRoute: AppExploreIndexRoute,
+  AppUploadIndexRoute: AppUploadIndexRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
