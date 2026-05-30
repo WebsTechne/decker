@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 // @ts-ignore keeps the type checker happy
 import { useForm, type ReactFormExtendedApi } from "@tanstack/react-form"
 import { useState } from "react"
@@ -205,6 +205,18 @@ function SignIn() {
           </form>
         </CardContent>
       </Card>
+
+      <div className="w-full py-4 sm:max-w-md">
+        <p className="text-muted-foreground text-center text-sm">
+          Don&apos;t have an account?{" "}
+          <Link
+            to="/auth/sign-up"
+            className="text-foreground underline underline-offset-4"
+          >
+            Sign up
+          </Link>
+        </p>
+      </div>
     </>
   )
 }

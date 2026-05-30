@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
 import { useForm, type ReactFormExtendedApi } from "@tanstack/react-form"
 import { useState } from "react"
 import { AccountStep } from "#/components/form/account-step"
@@ -233,6 +233,18 @@ function SignUp() {
           </form>
         </CardContent>
       </Card>
+
+      <div className="w-full py-4 sm:max-w-md">
+        <p className="text-muted-foreground text-center text-sm">
+          Already have an account?{" "}
+          <Link
+            to="/auth/sign-in"
+            className="text-foreground underline underline-offset-4"
+          >
+            Sign in
+          </Link>
+        </p>
+      </div>
 
       {/* <section className="fixed top-0 right-0 hidden h-dvh w-[calc(100%-448px)] overflow-clip sm:block">
         <img
