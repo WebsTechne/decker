@@ -1,6 +1,10 @@
 import { Spinner } from "#/components/ui/spinner"
 import { getCollectionById } from "#/server/collections"
-import { Comment01Icon } from "@hugeicons/core-free-icons"
+import {
+  Bookmark02Icon,
+  Comment01Icon,
+  Share08Icon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useParams } from "@tanstack/react-router"
@@ -33,10 +37,17 @@ function RouteComponent() {
       <header></header>
       <main className="relative flex-1">{collectionId}</main>
       <nav className="bg-background sticky right-0 bottom-0 left-0 z-1000 flex h-max border-t md:hidden">
-        <ul className="flex-evenly h-12 px-4">
+        <ul className="flex-evenly h-12 w-full px-4">
           <button className="flex items-center gap-1">
             <HugeiconsIcon icon={Comment01Icon} />
             {commentsCount}
+          </button>
+          <button className="flex items-center gap-1">
+            <HugeiconsIcon icon={Bookmark02Icon} />
+            {savesCount}
+          </button>
+          <button className="flex items-center gap-1">
+            <HugeiconsIcon icon={Share08Icon} />
           </button>
         </ul>
       </nav>
