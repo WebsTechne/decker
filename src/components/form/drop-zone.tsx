@@ -26,8 +26,8 @@ function DropZone({
   const [dragging, setDragging] = useState(false)
   const [files, setFiles] = useState<File[]>([])
 
-  const MAX_SIZE_MB = 6
-  const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
+  const HARD_LIMIT_MB = 20
+  const HARD_LIMIT_BYTES = HARD_LIMIT_MB * 1024 * 1024
 
   const previewUrl = useMemo(
     () => (preview ? URL.createObjectURL(preview) : null),
@@ -42,14 +42,13 @@ function DropZone({
   const addFiles = (incoming: File[]) => {
     const imageFiles = incoming.filter((f) => f.type.startsWith("image/"))
 
-    const oversized = imageFiles.filter((f) => f.size > MAX_SIZE_BYTES)
-    const validFiles = imageFiles.filter((f) => f.size <= MAX_SIZE_BYTES)
+    const wayTooLarge = imageFiles.filter((f) => f.size > HARD_LIMIT_BYTES)
+    const validFiles = imageFiles.filter((f) => f.size <= HARD_LIMIT_BYTES)
 
-    if (oversized.length > 0) {
+    if (wayTooLarge.length > 0)
       toast.warning(
-        `${oversized.length} file${oversized.length > 1 ? "s" : ""} skipped — max size is ${MAX_SIZE_MB}MB per image`,
+        `${wayTooLarge.length} file${wayTooLarge.length > 1 ? "s" : ""} skipped — max size is ${HARD_LIMIT_MB}MB per image`,
       )
-    }
 
     if (imageFiles.length !== incoming.length) {
       toast.warning("Only image files are accepted")
@@ -57,7 +56,7 @@ function DropZone({
 
     if (validFiles.length === 0) return
 
-    const updated = multiple ? [...files, ...incoming] : incoming
+    const updated = multiple ? [...files, ...validFiles] : validFiles
     setFiles(updated)
     onFiles(updated)
   }
