@@ -94,6 +94,7 @@ function UploadPage() {
     },
     onSubmit: async ({ value }) => {
       toast.loading("Creating collection...", { id: "upload-toast" })
+      let collectionId: string | undefined
 
       try {
         // 1 Create collection in DB
@@ -122,12 +123,16 @@ function UploadPage() {
         await createPages({
           data: {
             collectionId: collection.id,
-            pages: pages.map(({ url, position }) => ({
+            pages: pages.map(({ url, position, width, height }) => ({
               imageUrl: url,
               position,
+              width,
+              height,
             })),
           },
         })
+
+        collectionId = collection.id
 
         toast.dismiss("upload-toast")
         toast.success("Collection created!")

@@ -1,5 +1,6 @@
 import { supabase } from "./supabase"
 import imageCompression from "browser-image-compression"
+import { getImageDimensions } from "./dimensions"
 
 const PAGE_MAX_MB = 5.5 // just under the 6MB bucket limit
 const AVATAR_MAX_MB = 4 // because I feel like 4mb
@@ -42,7 +43,10 @@ async function uploadAvatar(file: File, userId: string) {
 }
 
 async function uploadPage(file: File, collectionId: string, position: number) {
-  const processed = await compressIfNeeded(file, PAGE_MAX_MB)
+  const [processed, dimensions] = await Promise.all([
+    compressIfNeeded(file, PAGE_MAX_MB),
+    getImageDimensions(file), // get from original before compression
+  ])
   const ext = processed.name.split(".").pop()?.toLowerCase() ?? "jpg"
   const path = `${collectionId}/${position}.${ext}`
 
@@ -62,7 +66,7 @@ async function uploadPage(file: File, collectionId: string, position: number) {
     .from("pages")
     .getPublicUrl(data.path)
 
-  return publicData.publicUrl
+  return { url: publicData.publicUrl, position, ...dimensions }
 }
 
 async function uploadPages(
@@ -72,16 +76,16 @@ async function uploadPages(
 ) {
   let uploaded = 0
 
-  const urls = await Promise.all(
+  const results = await Promise.all(
     files.map(async (file, index) => {
-      const url = await uploadPage(file, collectionId, index)
+      const result = await uploadPage(file, collectionId, index)
       uploaded++
       onProgress?.(uploaded, files.length)
-      return { url, position: index }
+      return result // 👈 return full result including width/height
     }),
   )
 
-  return urls
+  return results
 }
 
 export { uploadAvatar, uploadPage, uploadPages }

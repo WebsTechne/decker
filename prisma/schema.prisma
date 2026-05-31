@@ -148,6 +148,8 @@ model Page {
   id        String   @id @default(cuid())
   imageUrl  String
   position  Int
+  width     Int?
+  height    Int?
   createdAt DateTime @default(now())
 
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)

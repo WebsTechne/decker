@@ -29,7 +29,12 @@ const createPages = createServerFn({ method: "POST" })
   .inputValidator(
     (data: {
       collectionId: string
-      pages: { imageUrl: string; position: number }[]
+      pages: {
+        imageUrl: string
+        position: number
+        width?: number
+        height?: number
+      }[]
     }) => data,
   )
   .handler(async ({ data }) => {
@@ -41,6 +46,8 @@ const createPages = createServerFn({ method: "POST" })
         collectionId: data.collectionId,
         imageUrl: page.imageUrl,
         position: page.position,
+        width: page.width,
+        height: page.height,
         uploadedById: session.user.id,
       })),
     })

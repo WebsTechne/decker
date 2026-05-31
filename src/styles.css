@@ -182,7 +182,10 @@ body {
   .card-img {
     @apply dark:bg-secondary bg-foreground/80 relative aspect-2/1 w-full overflow-clip;
     & > img {
-      @apply absolute inset-0 object-cover opacity-100 mix-blend-overlay grayscale-10 dark:grayscale-20;
+      @apply absolute inset-0 object-cover opacity-100;
     }
+  }
+  .card-img-fallback > img {
+    @apply mix-blend-overlay grayscale-10 dark:grayscale-20;
   }
 }

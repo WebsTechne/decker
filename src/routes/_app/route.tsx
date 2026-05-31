@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_app")({
   component: AppLayout,
   pendingComponent: () => (
     <div className="flex-center h-dvh">
-      <Spinner />
+      <Spinner className="size-7" />
     </div>
   ),
   pendingMs: 300, // only show pending if it takes more than 300ms
