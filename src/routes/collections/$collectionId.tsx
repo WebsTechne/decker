@@ -61,16 +61,16 @@ function RouteComponent() {
       <section className="relative flex h-dvh flex-1 flex-col overflow-y-auto md:px-4">
         <header></header>
         <main className="relative flex-1 pb-4">
-          <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 2xl:grid-cols-4">
+          <div className="columns-1 gap-1 sm:columns-2 md:gap-4 lg:columns-3 2xl:columns-4">
             {pages.map((page, i) => (
               <div
                 key={page.id}
-                className="bg-muted dark:bg-card relative flex cursor-pointer items-center"
+                className="bg-muted dark:bg-card relative mb-1 flex cursor-pointer break-inside-avoid items-center"
               >
                 <img
                   src={page.imageUrl}
                   alt={`Collection: ${collection.name} Page: ${i + 1}`}
-                  className="object-contain"
+                  className="w-full object-contain"
                 />
                 <span className="font-heading absolute right-2 bottom-2 rounded-md bg-black/60 px-2 py-1 text-xs font-bold text-white">
                   {i < 10 && "0"}
