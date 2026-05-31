@@ -1,14 +1,32 @@
 import { supabase } from "./supabase"
+import imageCompression from "browser-image-compression"
+
+const PAGE_MAX_MB = 5.5 // just under the 6MB bucket limit
+const AVATAR_MAX_MB = 4 // because I feel like 4mb
+
+async function compressIfNeeded(file: File, maxSizeMB: number): Promise<File> {
+  const fileSizeMB = file.size / (1024 * 1024)
+
+  if (fileSizeMB <= maxSizeMB) return file // no compression needed
+
+  return imageCompression(file, {
+    maxSizeMB,
+    maxWidthOrHeight: 2560, // keep resolution high for readability
+    useWebWorker: true,
+    initialQuality: 0.85, // high quality
+  })
+}
 
 async function uploadAvatar(file: File, userId: string) {
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg"
+  const processed = await compressIfNeeded(file, AVATAR_MAX_MB)
+  const ext = processed.name.split(".").pop()?.toLowerCase() ?? "jpg"
   const path = `${userId}/avatar.${ext}`
 
   const { data, error } = await supabase.storage
     .from("avatars")
-    .upload(path, file, {
+    .upload(path, processed, {
       upsert: true,
-      contentType: file.type || `image/${ext}`,
+      contentType: processed.type || `image/${ext}`,
     })
 
   if (error) {
@@ -23,20 +41,16 @@ async function uploadAvatar(file: File, userId: string) {
   return publicData.publicUrl
 }
 
-async function uploadPage(
-  file: File,
-  collectionId: string,
-  position: number,
-  onProgress?: (uploaded: number, total: number) => void,
-) {
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg"
+async function uploadPage(file: File, collectionId: string, position: number) {
+  const processed = await compressIfNeeded(file, PAGE_MAX_MB)
+  const ext = processed.name.split(".").pop()?.toLowerCase() ?? "jpg"
   const path = `${collectionId}/${position}.${ext}`
 
   const { data, error } = await supabase.storage
     .from("pages")
-    .upload(path, file, {
+    .upload(path, processed, {
       upsert: true,
-      contentType: file.type || `image/${ext}`,
+      contentType: processed.type || `image/${ext}`,
     })
 
   if (error) {
