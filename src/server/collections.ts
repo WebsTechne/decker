@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { prisma } from "#/db"
 import { getSession } from "#/lib/auth-session"
+import type { Prisma } from "#/generated/prisma/client"
 
 const createCollection = createServerFn({ method: "POST" })
   .inputValidator(
@@ -59,4 +60,44 @@ const deleteCollection = createServerFn({ method: "POST" })
     })
   })
 
-export { createCollection, createPages, deleteCollection }
+const getCollectionById = createServerFn({ method: "GET" })
+  .inputValidator((data: { collectionId: string }) => data)
+  .handler(async ({ data }) => {
+    const session = await getSession()
+    if (!session) throw new Error("Unauthorized")
+
+    try {
+      const collection = await prisma.collection.findFirst({
+        where: { id: data.collectionId },
+        include: {
+          author: { select: { id: true, username: true, image: true } },
+          pages: { orderBy: { position: "asc" } },
+          tags: { include: { tag: true } },
+          saves: {
+            where: { userId: session.user.id },
+            take: 1,
+          },
+          _count: { select: { saves: true, comments: true, pages: true } },
+        },
+      })
+
+      if (!collection) throw new Error("Collection not found")
+      return collection
+    } catch (err) {
+      console.error("❌ getCollectionById error:", err)
+      throw err
+    }
+  })
+
+type CollectionData = Prisma.CollectionGetPayload<{
+  include: {
+    author: { select: { id: true; username: true; image: true } }
+    pages: true
+    tags: { include: { tag: true } }
+    saves: true
+    _count: { select: { saves: true; comments: true; pages: true } }
+  }
+}>
+
+export type { CollectionData }
+export { createCollection, createPages, deleteCollection, getCollectionById }

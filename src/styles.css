@@ -164,6 +164,9 @@ body {
 @utility flex-between {
   @apply flex items-center justify-between;
 }
+@utility flex-evenly {
+  @apply flex items-center justify-evenly;
+}
 
 /* Desktop */
 @media (min-width: 768px) {
@@ -179,7 +182,7 @@ body {
   .card-img {
     @apply dark:bg-secondary bg-foreground/80 relative aspect-2/1 w-full overflow-clip;
     & > img {
-      @apply aspect-2/1 w-full object-cover opacity-100 mix-blend-overlay grayscale-10 dark:grayscale-20;
+      @apply absolute inset-0 object-cover opacity-100 mix-blend-overlay grayscale-10 dark:grayscale-20;
     }
   }
 }
