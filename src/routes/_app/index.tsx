@@ -123,9 +123,14 @@ function Home() {
         {data.map((item, index) => (
           <Card size="sm" key={index} className="pt-0!">
             <Link to="/collections/ddfji" className="contents">
-              <div className="card-img">
+              <div
+                className={cn(
+                  "card-img",
+                  !item.bannerUrl && "card-img-fallback",
+                )}
+              >
                 <img
-                  src={item.image ?? "/card-loading-skeleton-unsplash.jpg"}
+                  src={item.bannerUrl ?? "/card-loading-skeleton-unsplash.jpg"}
                   alt={item.name}
                 />
                 <Badge
