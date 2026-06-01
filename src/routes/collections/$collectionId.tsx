@@ -110,31 +110,9 @@ const AuthorInfo = ({
             nativeButton={false}
             render={<AvatarGroup className="cursor-pointer" />}
           >
-            {allContributors!.map((c) => (
-              <Avatar key={c.user.id}>
+            {allContributors!.map((c, i) => (
+              <Avatar key={c.user.username + i}>
                 <AvatarImage src={c.user.image ?? ""} alt={c.user.username} />
-                <AvatarFallback>
-                  {c.user.username.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            ))}
-          </PopoverTrigger>
-        </Popover>
-      ) : (
-        // <Avatar>
-        //   <AvatarImage src={author.image ?? ""} alt={author.username} />
-        //   <AvatarFallback>
-        //     {author.username.charAt(0).toUpperCase()}
-        //   </AvatarFallback>
-        // </Avatar>
-        <Popover>
-          <PopoverTrigger
-            nativeButton={false}
-            render={<AvatarGroup className="cursor-pointer" />}
-          >
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Avatar key={author.username + i}>
-                <AvatarImage src={author.image ?? ""} alt={author.username} />
                 <AvatarFallback>
                   {author.username.charAt(i).toUpperCase()}
                 </AvatarFallback>
@@ -143,24 +121,24 @@ const AuthorInfo = ({
           </PopoverTrigger>
           <PopoverContent className="w-max rounded-lg! p-2!">
             <div className="flex flex-col gap-1">
-              {Array.from({ length: 3 }).map((_, i) => (
+              {allContributors!.map((c, i) => (
                 <Link
-                  to={`/u/${author.username}`}
+                  to={`/u/${c.user.username}`}
                   className="hover:bg-muted flex items-start gap-2 rounded-md p-2"
                 >
                   <Avatar className="size-6">
                     <AvatarImage
-                      src={author.image ?? ""}
-                      alt={author.username}
+                      src={c.user.image ?? ""}
+                      alt={c.user.username}
                     />
                     <AvatarFallback>
-                      {author.username.charAt(i).toUpperCase()}
+                      {c.user.username.charAt(i).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start justify-center gap-1">
-                    <span>{author.username}</span>
+                    <span>{c.user.username}</span>
                     <span className="text-muted-foreground text-sm">
-                      {author.school?.name} • {author.department?.name}
+                      {c.user.school?.name} • {c.user.department?.name}
                     </span>
                   </div>
                 </Link>
@@ -168,8 +146,15 @@ const AuthorInfo = ({
             </div>
           </PopoverContent>
         </Popover>
+      ) : (
+        <Avatar>
+          <AvatarImage src={author.image ?? ""} alt={author.username} />
+          <AvatarFallback>
+            {author.username.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
       )}
-      {!hasCollaborators ? (
+      {hasCollaborators ? (
         <span>
           {author.username} +{collaborators.length}
         </span>
@@ -456,6 +441,8 @@ function RouteComponent() {
                     src={page.imageUrl}
                     alt={`Page: ${i + 1}`}
                     loading="lazy"
+                    onContextMenu={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
                     className="absolute inset-0 w-full object-contain"
                   />
                   <span className="font-heading absolute right-2 bottom-2 rounded-md bg-black/60 px-2 py-1 text-xs font-bold text-white">
