@@ -32,10 +32,9 @@ import {
   createFileRoute,
   useParams,
   Link,
-  useNavigate,
   useRouter,
 } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useState, type KeyboardEvent } from "react"
 import { toast } from "sonner"
 
 export const Route = createFileRoute("/collections/$collectionId")({
@@ -121,7 +120,7 @@ const AuthorInfo = ({
           </PopoverTrigger>
           <PopoverContent className="w-max rounded-lg! p-2!">
             <div className="flex flex-col gap-1">
-              {allContributors!.map((c, i) => (
+              {allContributors!.map((c) => (
                 <Link
                   key={c.user.id}
                   to={`/u/${c.user.username}`}
@@ -224,6 +223,38 @@ function RouteComponent() {
 
     staleTime: Infinity,
   })
+
+  useEffect(() => {
+    if (lightboxIndex === null || !collection?.pages) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "Escape":
+          setLightboxIndex(null)
+          break
+
+        case "ArrowLeft":
+          setLightboxIndex((prev) =>
+            prev !== null
+              ? (prev - 1 + collection.pages.length) % collection.pages.length
+              : null,
+          )
+          break
+
+        case "ArrowRight":
+          setLightboxIndex((prev) =>
+            prev !== null ? (prev + 1) % collection.pages.length : null,
+          )
+          break
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [lightboxIndex, collection?.pages])
 
   if (isPending)
     return (
@@ -395,7 +426,7 @@ function RouteComponent() {
               </section>
             </header>
 
-            <section className="flex flex-col md:flex-row! md:px-4">
+            <section className="flex flex-col pt-1 md:flex-row! md:px-4">
               <div
                 className={cn(
                   "card-img mx-auto w-[calc(100%-20px)]! rounded-md",
@@ -505,7 +536,7 @@ function RouteComponent() {
                 className="disabled:text-muted-foreground flex items-center gap-1"
                 disabled={isMine}
               >
-                <HugeiconsIcon icon={Bookmark02Icon} strokeWidth={1.5} />
+                <HugeiconsIcon icon={Bookmark02Icon} strokeWidth={2} />
                 {savesCount}
               </button>
               <button className="flex items-center gap-1">
