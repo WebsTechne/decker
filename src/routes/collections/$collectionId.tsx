@@ -23,6 +23,7 @@ import {
   useParams,
   Link,
   useNavigate,
+  useRouter,
 } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
@@ -65,6 +66,7 @@ const ThemeToggle = ({ className }: { className?: string }) => {
 
 function RouteComponent() {
   const navigate = useNavigate()
+  const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
@@ -86,7 +88,36 @@ function RouteComponent() {
         <Spinner className="size-7" />
       </div>
     )
-  if (!collection) return <div>Collection not found</div>
+  if (!collection)
+    return (
+      <div className="flex-center h-dvh px-5">
+        <button
+          className="fixed top-4 left-4 md:hidden"
+          onClick={() => router.history.back()}
+        >
+          <HugeiconsIcon icon={ArrowLeft02Icon} strokeWidth={2} />
+        </button>
+        <div>
+          <h1 className="font-heading mb-2 text-4xl font-bold">
+            Collection not found
+          </h1>
+          <p className="text-muted-foreground max-w-prose text-base md:text-lg">
+            Collection with ID{" "}
+            <code className="bg-muted rounded-sm px-1 font-mono text-sm md:text-base">
+              {collectionId}
+            </code>{" "}
+            not found. You can explore all available collections on the{" "}
+            <Link
+              to="/explore"
+              className="text-foreground! underline underline-offset-4"
+            >
+              Explore page
+            </Link>
+            .
+          </p>
+        </div>
+      </div>
+    )
 
   const {
     author,

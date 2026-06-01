@@ -77,18 +77,27 @@ const getCollectionById = createServerFn({ method: "GET" })
       const collection = await prisma.collection.findFirst({
         where: { id: data.collectionId },
         include: {
-          author: { select: { id: true, username: true, image: true } },
+          author: {
+            select: {
+              id: true,
+              username: true,
+              image: true,
+              department: { select: { id: true, name: true } },
+              school: { select: { id: true, name: true } },
+            },
+          },
           pages: { orderBy: { position: "asc" } },
           tags: { include: { tag: true } },
           saves: {
             where: { userId: session.user.id },
             take: 1,
           },
+          collaborators: { select: { user: true } },
           _count: { select: { saves: true, comments: true, pages: true } },
         },
       })
 
-      if (!collection) throw new Error("Collection not found")
+      if (!collection) return null
       return collection
     } catch (err) {
       console.error("❌ getCollectionById error:", err)
