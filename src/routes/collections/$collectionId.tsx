@@ -147,12 +147,35 @@ const AuthorInfo = ({
           </PopoverContent>
         </Popover>
       ) : (
-        <Avatar>
-          <AvatarImage src={author.image ?? ""} alt={author.username} />
-          <AvatarFallback>
-            {author.username.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <Popover>
+          {" "}
+          <PopoverTrigger nativeButton={false} render={<Avatar />}>
+            <AvatarImage src={author.image ?? ""} alt={author.username} />
+            <AvatarFallback>
+              {author.username.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </PopoverTrigger>
+          <PopoverContent className="w-max rounded-lg! p-2!">
+            <Link
+              key={author.id}
+              to={`/u/${author.username}`}
+              className="hover:bg-muted flex items-center gap-2 rounded-md p-2"
+            >
+              <Avatar className="size-7">
+                <AvatarImage src={author.image ?? ""} alt={author.username} />
+                <AvatarFallback>
+                  {author.username.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col items-start justify-center gap-1">
+                <span>{author.username}</span>
+                <span className="text-muted-foreground text-sm">
+                  {author.school?.name} • {author.department?.name}
+                </span>
+              </div>
+            </Link>
+          </PopoverContent>
+        </Popover>
       )}
       {hasContributors ? (
         <span>
