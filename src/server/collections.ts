@@ -149,5 +149,92 @@ type CollectionData = Prisma.CollectionGetPayload<{
   }
 }>
 
-export type { CollectionData }
-export { createCollection, createPages, deleteCollection, getCollectionById }
+// Fetch Collection List
+const getCollectionList = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const session = await getSession()
+    if (!session) throw new Error("Unauthorized")
+
+    try {
+      const collections = await prisma.collection.findMany({
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true,
+              image: true,
+              department: { select: { id: true, name: true } },
+              school: { select: { id: true, name: true } },
+            },
+          },
+          tags: { include: { tag: true } },
+          saves: {
+            where: { userId: session.user.id },
+            take: 1,
+          },
+          contributors: {
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  image: true,
+                  username: true,
+                  school: { select: { id: true, name: true } },
+                  department: { select: { id: true, name: true } },
+                },
+              },
+            },
+            orderBy: { addedAt: "asc" },
+          },
+          _count: { select: { saves: true, pages: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      })
+
+      if (!collections) return null
+      return collections
+    } catch (err) {
+      console.error("❌ getCollectionById error:", err)
+      throw err
+    }
+  },
+)
+
+type CollectionListData = Prisma.CollectionGetPayload<{
+  include: {
+    author: {
+      select: {
+        id: true
+        username: true
+        image: true
+        school: { select: { id: true; name: true } }
+        department: { select: { id: true; name: true } }
+      }
+    }
+    tags: { include: { tag: true } }
+    saves: true
+    contributors: {
+      select: {
+        user: {
+          select: {
+            id: true
+            image: true
+            username: true
+            school: { select: { id: true; name: true } }
+            department: { select: { id: true; name: true } }
+          }
+        }
+      }
+    }
+    _count: { select: { saves: true; pages: true } }
+  }
+}>
+
+export type { CollectionData, CollectionListData }
+export {
+  createCollection,
+  createPages,
+  deleteCollection,
+  getCollectionById,
+  getCollectionList,
+}
