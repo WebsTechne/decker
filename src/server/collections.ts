@@ -92,7 +92,20 @@ const getCollectionById = createServerFn({ method: "GET" })
             where: { userId: session.user.id },
             take: 1,
           },
-          collaborators: { select: { user: true } },
+          collaborators: {
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  image: true,
+                  username: true,
+                  school: { select: { id: true, name: true } },
+                  department: { select: { id: true, name: true } },
+                },
+              },
+            },
+            orderBy: { addedAt: "asc" },
+          },
           _count: { select: { saves: true, comments: true, pages: true } },
         },
       })
@@ -107,10 +120,31 @@ const getCollectionById = createServerFn({ method: "GET" })
 
 type CollectionData = Prisma.CollectionGetPayload<{
   include: {
-    author: { select: { id: true; username: true; image: true } }
+    author: {
+      select: {
+        id: true
+        username: true
+        image: true
+        school: { select: { id: true; name: true } }
+        department: { select: { id: true; name: true } }
+      }
+    }
     pages: true
     tags: { include: { tag: true } }
     saves: true
+    collaborators: {
+      select: {
+        user: {
+          select: {
+            id: true
+            image: true
+            username: true
+            school: { select: { id: true; name: true } }
+            department: { select: { id: true; name: true } }
+          }
+        }
+      }
+    }
     _count: { select: { saves: true; comments: true; pages: true } }
   }
 }>

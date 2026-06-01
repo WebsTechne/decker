@@ -1,7 +1,17 @@
 import { useTheme } from "#/components/theme-provider"
-import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarImage,
+} from "#/components/ui/avatar"
 import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "#/components/ui/popover"
 import { Spinner } from "#/components/ui/spinner"
 import { authClient } from "#/lib/auth-client"
 import { cn } from "#/lib/utils"
@@ -26,6 +36,7 @@ import {
   useRouter,
 } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: RouteComponent,
@@ -64,6 +75,116 @@ const ThemeToggle = ({ className }: { className?: string }) => {
   )
 }
 
+type Author = {
+  id: string
+  image: string | null
+  username: string
+  school: {
+    id: string
+    name: string
+  } | null
+  department: {
+    id: string
+    name: string
+  } | null
+}
+type Collaborator = { user: Author }
+
+const AuthorInfo = ({
+  author,
+  collaborators,
+}: {
+  author: Author
+  collaborators: Collaborator[]
+}) => {
+  const hasCollaborators = collaborators.length > 0
+  const allContributors = hasCollaborators
+    ? [{ user: author }, ...collaborators]
+    : null
+
+  return (
+    <div className="flex w-full items-center gap-2 py-2">
+      {hasCollaborators ? (
+        <Popover>
+          <PopoverTrigger
+            nativeButton={false}
+            render={<AvatarGroup className="cursor-pointer" />}
+          >
+            {allContributors!.map((c) => (
+              <Avatar key={c.user.id}>
+                <AvatarImage src={c.user.image ?? ""} alt={c.user.username} />
+                <AvatarFallback>
+                  {c.user.username.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            ))}
+          </PopoverTrigger>
+        </Popover>
+      ) : (
+        // <Avatar>
+        //   <AvatarImage src={author.image ?? ""} alt={author.username} />
+        //   <AvatarFallback>
+        //     {author.username.charAt(0).toUpperCase()}
+        //   </AvatarFallback>
+        // </Avatar>
+        <Popover>
+          <PopoverTrigger
+            nativeButton={false}
+            render={<AvatarGroup className="cursor-pointer" />}
+          >
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Avatar key={author.username + i}>
+                <AvatarImage src={author.image ?? ""} alt={author.username} />
+                <AvatarFallback>
+                  {author.username.charAt(i).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            ))}
+          </PopoverTrigger>
+          <PopoverContent className="w-max rounded-lg! p-2!">
+            <div className="flex flex-col gap-1">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Link
+                  to={`/u/${author.username}`}
+                  className="hover:bg-muted flex items-start gap-2 rounded-md p-2"
+                >
+                  <Avatar className="size-6">
+                    <AvatarImage
+                      src={author.image ?? ""}
+                      alt={author.username}
+                    />
+                    <AvatarFallback>
+                      {author.username.charAt(i).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col items-start justify-center gap-1">
+                    <span>{author.username}</span>
+                    <span className="text-muted-foreground text-sm">
+                      {author.school?.name} • {author.department?.name}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+      {!hasCollaborators ? (
+        <span>
+          {author.username} +{collaborators.length}
+        </span>
+      ) : (
+        <Link
+          className="underline-offset-4 hover:underline"
+          to={`/u/${author.username}`}
+        >
+          {author.username}
+        </Link>
+      )}
+    </div>
+  )
+}
+
 function RouteComponent() {
   const navigate = useNavigate()
   const router = useRouter()
@@ -74,7 +195,7 @@ function RouteComponent() {
     if (!isPending && !session) {
       navigate({ to: "/auth/sign-in" })
     }
-  }, [session])
+  }, [session, isPending, navigate])
 
   const { collectionId } = useParams({ from: "/collections/$collectionId" })
   const { data: collection, isLoading: isLoadingCollection } = useQuery({
@@ -119,8 +240,13 @@ function RouteComponent() {
       </div>
     )
 
+  const actionNotAvailable = () => {
+    toast("This action is not available")
+  }
+
   const {
     author,
+    collaborators,
     pages,
     _count: { comments: commentsCount, pages: pagesCount, saves: savesCount },
   } = collection
@@ -132,21 +258,23 @@ function RouteComponent() {
       <div className="flex h-dvh">
         {/* sidebar in larger screens */}
         <aside className="sidebar relative z-1010 hidden flex-col">
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            className="absolute top-4 left-1/2 -translate-x-1/2"
-            onClick={() => navigate({ to: "/" })}
-          >
-            <HugeiconsIcon
-              icon={ArrowLeft02Icon}
-              strokeWidth={2}
-              className="size-6!"
-            />
-          </Button>
+          <div className="flex-center">
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              className=""
+              onClick={() => router.history.back()}
+            >
+              <HugeiconsIcon
+                icon={ArrowLeft02Icon}
+                strokeWidth={2}
+                className="size-6!"
+              />
+            </Button>
+          </div>
 
-          <ul className="flex-center h-full w-full flex-col gap-15 px-4">
-            <span className="text-muted-foreground flex flex-col items-center justify-start gap-1 select-none">
+          <ul className="flex-center h-full w-full flex-1 flex-col gap-10 px-4">
+            <span className="bg-muted/40 text-muted-foreground flex flex-col items-center justify-start gap-1 rounded-full border p-2 select-none">
               <HugeiconsIcon icon={File02Icon} strokeWidth={2} />
               {pagesCount}
             </span>
@@ -163,7 +291,22 @@ function RouteComponent() {
             </button>
           </ul>
 
-          <ThemeToggle className="absolute bottom-4 left-1/2 -translate-x-1/2" />
+          <div className="flex-center flex-col gap-2">
+            {isMine && (
+              <Button
+                variant="ghost"
+                size="icon-lg"
+                onClick={actionNotAvailable}
+              >
+                <HugeiconsIcon
+                  icon={PencilEdit02Icon}
+                  strokeWidth={2}
+                  className="size-6!"
+                />
+              </Button>
+            )}{" "}
+            <ThemeToggle className="" />
+          </div>
         </aside>
 
         {/* body */}
@@ -174,7 +317,7 @@ function RouteComponent() {
               <Button
                 variant="ghost"
                 size="icon-lg"
-                onClick={() => navigate({ to: "/" })}
+                onClick={() => router.history.back()}
               >
                 <HugeiconsIcon
                   icon={ArrowLeft02Icon}
@@ -184,12 +327,11 @@ function RouteComponent() {
               </Button>
 
               <section className="flex items-center gap-2">
-                <ThemeToggle />
                 {isMine && (
                   <Button
                     variant="ghost"
                     size="icon-lg"
-                    onClick={() => navigate({ to: "/" })}
+                    onClick={actionNotAvailable}
                   >
                     <HugeiconsIcon
                       icon={PencilEdit02Icon}
@@ -198,6 +340,7 @@ function RouteComponent() {
                     />
                   </Button>
                 )}
+                <ThemeToggle />
               </section>
             </header>
             <section className="flex flex-col sm:flex-row! md:px-4">
@@ -236,29 +379,13 @@ function RouteComponent() {
                   ))}
                 </div>
 
-                <div className="flex w-full items-center gap-2 py-2">
-                  <Avatar>
-                    <AvatarImage
-                      src={author.image ?? ""}
-                      alt={author.username}
-                    />
-                    <AvatarFallback>
-                      {author.username.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Link
-                    className="underline-offset-4 hover:underline"
-                    to={`/u/${author.username}`}
-                  >
-                    {author.username}
-                  </Link>
-                </div>
+                <AuthorInfo author={author} collaborators={collaborators} />
               </div>
             </section>
           </div>
 
           {/* Desktop Header */}
-          <section className="relative hidden items-center gap-5 p-5 md:flex">
+          <section className="relative hidden items-center gap-10 p-5 md:flex">
             {/* <div className="to-background absolute inset-0 -inset-be-72 z-2 bg-linear-to-b from-transparent" />
           <div className="bg-muted-foreground dark:bg-secondary! card-img absolute inset-0 -inset-be-72 z-1 aspect-auto! *:h-full! *:w-full!">
             <img
@@ -305,20 +432,8 @@ function RouteComponent() {
                   </Badge>
                 ))}
               </div>
-              <div className="flex w-full items-center gap-2 py-2">
-                <Avatar>
-                  <AvatarImage src={author.image ?? ""} alt={author.username} />
-                  <AvatarFallback>
-                    {author.username.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <Link
-                  className="underline-offset-4 hover:underline"
-                  to={`/u/${author.username}`}
-                >
-                  {author.username}
-                </Link>
-              </div>
+
+              <AuthorInfo author={author} collaborators={collaborators} />
             </div>
           </section>
 
