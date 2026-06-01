@@ -23,8 +23,13 @@ const config = defineConfig({
     noExternal: ["@better-auth/core", "better-auth"],
   },
   server: {
+    host: "0.0.0.0",
     watch: {
       usePolling: true, // helps on Windows
+    },
+    hmr: {
+      host: "10.94.8.24",
+      protocol: "ws",
     },
   },
   optimizeDeps: {

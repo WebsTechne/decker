@@ -299,7 +299,7 @@ function RouteComponent() {
     _count: { comments: commentsCount, pages: pagesCount, saves: savesCount },
   } = collection
 
-  const isMine = session?.user.id === author.id
+  const isMine = session.user.id === author.id
 
   return (
     <>
@@ -330,7 +330,10 @@ function RouteComponent() {
               <HugeiconsIcon icon={Comment01Icon} strokeWidth={2} />
               {commentsCount}
             </button>
-            <button className="flex flex-col items-center gap-1">
+            <button
+              className="disabled:text-muted-foreground flex flex-col items-center gap-1"
+              disabled={isMine}
+            >
               <HugeiconsIcon icon={Bookmark02Icon} strokeWidth={2} />
               {savesCount}
             </button>
@@ -361,7 +364,7 @@ function RouteComponent() {
         <section className="relative flex h-dvh flex-1 flex-col overflow-y-auto">
           {/* Mobile Header */}
           <div className="md:hidden">
-            <header className="bg-background flex-between sticky top-0 z-1000 h-12 shrink-0 border-b">
+            <header className="bg-background flex-between sticky top-0 z-1000 h-12 shrink-0">
               <Button
                 variant="ghost"
                 size="icon-lg"
@@ -392,10 +395,10 @@ function RouteComponent() {
               </section>
             </header>
 
-            <section className="flex flex-col sm:flex-row! md:px-4">
+            <section className="flex flex-col md:flex-row! md:px-4">
               <div
                 className={cn(
-                  "card-img",
+                  "card-img mx-auto w-[calc(100%-20px)]! rounded-md",
                   !collection.bannerUrl && "card-img-fallback",
                 )}
               >
@@ -498,8 +501,11 @@ function RouteComponent() {
                 <HugeiconsIcon icon={Comment01Icon} strokeWidth={2} />
                 {commentsCount}
               </button>
-              <button className="flex items-center gap-1">
-                <HugeiconsIcon icon={Bookmark02Icon} strokeWidth={2} />
+              <button
+                className="disabled:text-muted-foreground flex items-center gap-1"
+                disabled={isMine}
+              >
+                <HugeiconsIcon icon={Bookmark02Icon} strokeWidth={1.5} />
                 {savesCount}
               </button>
               <button className="flex items-center gap-1">
