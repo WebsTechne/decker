@@ -61,13 +61,13 @@ model User {
   sessions Session[]
   accounts Account[]
 
-  collections   Collection[]   @relation("AuthoredCollections")
+  collections   Collection[]  @relation("AuthoredCollections")
   saves         Save[]
-  collaborating Collaborator[]
+  contributing  Contributor[]
   comments      Comment[]
   pagesUploaded Page[]
-  activityFeed  Activity[]     @relation("RecipientActivity")
-  activityDone  Activity[]     @relation("ActorActivity")
+  activityFeed  Activity[]    @relation("RecipientActivity")
+  activityDone  Activity[]    @relation("ActorActivity")
 
   @@map("user")
 }
@@ -136,12 +136,12 @@ model Collection {
   author   User   @relation("AuthoredCollections", fields: [authorId], references: [id])
   authorId String
 
-  pages         Page[]
-  tags          CollectionTag[]
-  saves         Save[]
-  collaborators Collaborator[]
-  comments      Comment[]
-  activities    Activity[]
+  pages        Page[]
+  tags         CollectionTag[]
+  saves        Save[]
+  contributors Contributor[]
+  comments     Comment[]
+  activities   Activity[]
 }
 
 model Page {
@@ -183,7 +183,7 @@ model Save {
   @@unique([userId, collectionId])
 }
 
-model Collaborator {
+model Contributor {
   id      String   @id @default(cuid())
   addedAt DateTime @default(now())
 

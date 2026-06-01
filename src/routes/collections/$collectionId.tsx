@@ -15,7 +15,7 @@ import {
 import { Spinner } from "#/components/ui/spinner"
 import { authClient } from "#/lib/auth-client"
 import { cn } from "#/lib/utils"
-import { getCollectionById } from "#/server/collections"
+import { getCollectionById, type CollectionData } from "#/server/collections"
 import {
   ArrowLeft01Icon,
   ArrowLeft02Icon,
@@ -88,23 +88,23 @@ type Author = {
     name: string
   } | null
 }
-type Collaborator = { user: Author }
+type Contributor = { user: Author }
 
 const AuthorInfo = ({
   author,
-  collaborators,
+  contributors,
 }: {
   author: Author
-  collaborators: Collaborator[]
+  contributors: Contributor[]
 }) => {
-  const hasCollaborators = collaborators.length > 0
-  const allContributors = hasCollaborators
-    ? [{ user: author }, ...collaborators]
+  const hasContributors = contributors.length > 0
+  const allContributors = hasContributors
+    ? [{ user: author }, ...contributors]
     : null
 
   return (
     <div className="flex w-full items-center gap-2 py-2">
-      {hasCollaborators ? (
+      {hasContributors ? (
         <Popover>
           <PopoverTrigger
             nativeButton={false}
@@ -114,7 +114,7 @@ const AuthorInfo = ({
               <Avatar key={c.user.username + i}>
                 <AvatarImage src={c.user.image ?? ""} alt={c.user.username} />
                 <AvatarFallback>
-                  {author.username.charAt(i).toUpperCase()}
+                  {author.username.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             ))}
@@ -123,6 +123,7 @@ const AuthorInfo = ({
             <div className="flex flex-col gap-1">
               {allContributors!.map((c, i) => (
                 <Link
+                  key={c.user.id}
                   to={`/u/${c.user.username}`}
                   className="hover:bg-muted flex items-start gap-2 rounded-md p-2"
                 >
@@ -132,7 +133,7 @@ const AuthorInfo = ({
                       alt={c.user.username}
                     />
                     <AvatarFallback>
-                      {c.user.username.charAt(i).toUpperCase()}
+                      {c.user.username.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start justify-center gap-1">
@@ -154,9 +155,9 @@ const AuthorInfo = ({
           </AvatarFallback>
         </Avatar>
       )}
-      {hasCollaborators ? (
+      {hasContributors ? (
         <span>
-          {author.username} +{collaborators.length}
+          {author.username} +{contributors.length}
         </span>
       ) : (
         <Link
@@ -170,30 +171,96 @@ const AuthorInfo = ({
   )
 }
 
+const CollectionInfo = ({
+  collection,
+  author,
+  contributors,
+}: {
+  collection: CollectionData
+  author: Author
+  contributors: Contributor[]
+}) => (
+  <div
+    className={cn(
+      "relative z-3 flex w-full flex-col gap-2",
+      "px-3 pt-2 md:p-0!",
+    )}
+  >
+    <h1 className={cn("font-heading font-bold", "text-2xl md:text-4xl!")}>
+      {collection.name}
+    </h1>
+    <p className={cn("text-muted-foreground", "text-sm md:text-lg!")}>
+      {collection.description}
+    </p>
+    <div className="flex flex-wrap gap-2">
+      {collection.tags.map((tag) => (
+        <Badge
+          key={tag.tagId}
+          variant="secondary"
+          className="not-dark:bg-muted px-2 py-2!"
+        >
+          {tag.tag.name}
+        </Badge>
+      ))}
+    </div>
+    <AuthorInfo author={author} contributors={contributors} />
+  </div>
+)
+
 function RouteComponent() {
-  const navigate = useNavigate()
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
-  useEffect(() => {
-    if (!isPending && !session) {
-      navigate({ to: "/auth/sign-in" })
-    }
-  }, [session, isPending, navigate])
-
   const { collectionId } = useParams({ from: "/collections/$collectionId" })
-  const { data: collection, isLoading: isLoadingCollection } = useQuery({
+  const {
+    data: collection,
+    isLoading,
+    isPending: isCollectionPending,
+  } = useQuery({
     queryKey: ["collection", collectionId],
     queryFn: () => getCollectionById({ data: { collectionId } }),
+    enabled: !!session && !isPending,
+
+    staleTime: Infinity,
   })
 
-  if (isLoadingCollection)
+  if (isPending)
     return (
       <div className="flex-center h-dvh">
         <Spinner className="size-7" />
       </div>
     )
+
+  if (!session)
+    return (
+      <div className="flex-center h-dvh px-5">
+        <div>
+          <h1 className="font-heading mb-2 text-4xl font-bold">
+            You aren&apos;t signed in :(
+          </h1>
+          <p className="text-muted-foreground max-w-prose text-base md:text-lg">
+            This collection is only available to signed-in users. Sign in to
+            continue. Sign in at the{" "}
+            <Link
+              to="/auth/sign-in"
+              className="text-foreground! whitespace-nowrap underline underline-offset-4"
+            >
+              Sign in
+            </Link>{" "}
+            page
+          </p>
+        </div>
+      </div>
+    )
+
+  if (isCollectionPending || isLoading)
+    return (
+      <div className="flex-center h-dvh">
+        <Spinner className="size-7" />
+      </div>
+    )
+
   if (!collection)
     return (
       <div className="flex-center h-dvh px-5">
@@ -205,21 +272,17 @@ function RouteComponent() {
         </button>
         <div>
           <h1 className="font-heading mb-2 text-4xl font-bold">
-            Collection not found
+            Collection not found :(
           </h1>
           <p className="text-muted-foreground max-w-prose text-base md:text-lg">
-            Collection with ID{" "}
-            <code className="bg-muted rounded-sm px-1 font-mono text-sm md:text-base">
-              {collectionId}
-            </code>{" "}
-            not found. You can explore all available collections on the{" "}
+            This collection may have been deleted, made private, or the link may
+            be incorrect. Browse other collections on the{" "}
             <Link
               to="/explore"
-              className="text-foreground! underline underline-offset-4"
+              className="text-foreground! whitespace-nowrap underline underline-offset-4"
             >
               Explore page
             </Link>
-            .
           </p>
         </div>
       </div>
@@ -231,7 +294,7 @@ function RouteComponent() {
 
   const {
     author,
-    collaborators,
+    contributors,
     pages,
     _count: { comments: commentsCount, pages: pagesCount, saves: savesCount },
   } = collection
@@ -328,6 +391,7 @@ function RouteComponent() {
                 <ThemeToggle />
               </section>
             </header>
+
             <section className="flex flex-col sm:flex-row! md:px-4">
               <div
                 className={cn(
@@ -344,44 +408,32 @@ function RouteComponent() {
                   alt={collection.name}
                 />
               </div>
-              <div className="flex w-full flex-col px-3 pt-2">
-                <h1 className="font-heading text-2xl font-bold md:text-3xl">
-                  {collection.name}
-                </h1>
-                <p className="text-muted-foreground mb-2 text-sm md:text-lg!">
-                  {collection.description}
-                </p>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  {collection.tags.map((tag) => (
-                    <Badge
-                      key={tag.tagId}
-                      variant="secondary"
-                      className="not-dark:bg-muted px-2 py-2! text-sm"
-                    >
-                      {tag.tag.name}
-                    </Badge>
-                  ))}
-                </div>
-
-                <AuthorInfo author={author} collaborators={collaborators} />
-              </div>
+              <CollectionInfo
+                collection={collection}
+                author={author}
+                contributors={contributors}
+              />
             </section>
           </div>
 
           {/* Desktop Header */}
           <section className="relative hidden items-center gap-10 p-5 md:flex">
-            {/* <div className="to-background absolute inset-0 -inset-be-72 z-2 bg-linear-to-b from-transparent" />
-          <div className="bg-muted-foreground dark:bg-secondary! card-img absolute inset-0 -inset-be-72 z-1 aspect-auto! *:h-full! *:w-full!">
-            <img
-              src={
-                collection.bannerUrl ?? "/card-loading-skeleton-unsplash.jpg"
-              }
-              className="blur-xl"
-              alt="Collection Banner"
-              loading="eager"
-            />
-          </div> */}
+            {/* <div className="to-background absolute inset-0 z-2 bg-linear-to-b from-transparent" />
+            <div
+              className={cn(
+                "bg-muted-foreground dark:bg-secondary! card-img absolute inset-0 z-1 aspect-auto! *:h-full! *:w-full!",
+                !collection.bannerUrl && "card-img-fallback",
+              )}
+            >
+              <img
+                src={
+                  collection.bannerUrl ?? "/card-loading-skeleton-unsplash.jpg"
+                }
+                className="blur-xl"
+                alt="Collection Banner"
+                loading="eager"
+              />
+            </div> */}
 
             <div
               className={cn(
@@ -397,29 +449,12 @@ function RouteComponent() {
                 loading="eager"
               />
             </div>
-            <div className="relative z-3 flex flex-1 flex-col gap-2">
-              <div>
-                <h1 className="font-heading mb-1 text-4xl font-bold">
-                  {collection.name}
-                </h1>
-                <p className="text-muted-foreground text-lg">
-                  {collection.description}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {collection.tags.map((tag) => (
-                  <Badge
-                    key={tag.tagId}
-                    variant="secondary"
-                    className="not-dark:bg-muted px-2 py-2! text-sm"
-                  >
-                    {tag.tag.name}
-                  </Badge>
-                ))}
-              </div>
 
-              <AuthorInfo author={author} collaborators={collaborators} />
-            </div>
+            <CollectionInfo
+              collection={collection}
+              author={author}
+              contributors={contributors}
+            />
           </section>
 
           <main className="relative flex-1 md:px-4">
@@ -427,7 +462,7 @@ function RouteComponent() {
               {pages.map((page, i) => (
                 <div
                   key={page.id}
-                  className="bg-muted dark:bg-card md: relative mb-1 cursor-pointer break-inside-avoid md:mb-2"
+                  className="bg-muted dark:bg-card relative mb-1 cursor-pointer break-inside-avoid md:mb-2"
                   onClick={() => setLightboxIndex(i)}
                   style={
                     page.width && page.height
@@ -484,8 +519,10 @@ function RouteComponent() {
             src={pages[lightboxIndex].imageUrl}
             alt={`page ${lightboxIndex + 1}`}
             className="max-h-[90dvh] max-w-[calc(100dvw-16px)] rounded-lg object-contain"
-            onClick={(e) => e.stopPropagation()}
             draggable={false}
+            onContextMenu={(e) => e.preventDefault()}
+            onDragStart={(e) => e.preventDefault()}
+            onClick={(e) => e.stopPropagation()}
           />
           {/* prev/next */}
           <Button

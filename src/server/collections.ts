@@ -92,7 +92,7 @@ const getCollectionById = createServerFn({ method: "GET" })
             where: { userId: session.user.id },
             take: 1,
           },
-          collaborators: {
+          contributors: {
             select: {
               user: {
                 select: {
@@ -132,7 +132,7 @@ type CollectionData = Prisma.CollectionGetPayload<{
     pages: true
     tags: { include: { tag: true } }
     saves: true
-    collaborators: {
+    contributors: {
       select: {
         user: {
           select: {
