@@ -34,7 +34,9 @@ const AuthorInfo = ({
         <Popover>
           <PopoverTrigger
             nativeButton={false}
-            render={<AvatarGroup className="cursor-pointer" />}
+            render={
+              <AvatarGroup className="*:data-[slot=avatar]:ring-card cursor-pointer" />
+            }
           >
             {allContributors!.map((c, i) => (
               <Avatar key={c.user.username + i} className="size-7">
