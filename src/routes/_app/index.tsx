@@ -86,7 +86,7 @@ function Home() {
         return collection.authorId === session?.user.id
 
       case "saved":
-        return collection.saves.length > 1
+        return collection.saves.length > 0
 
       default:
         return true
