@@ -33,7 +33,7 @@ function RouteComponent() {
     "all" | "created" | "saved"
   >("all")
 
-  const { data: collections, isPending: isPending } = useQuery({
+  const { data: collections, isPending } = useQuery({
     queryKey: ["collectionsList"],
     queryFn: () => getCollectionList(),
     enabled: !!session && !authPending,
@@ -50,17 +50,19 @@ function RouteComponent() {
   if (!collections)
     return (
       <div className="flex-center h-[calc(100dvh-48px-56px)] px-5">
-        <h1 className="font-heading mb-2 text-4xl font-bold">Ummm...</h1>
-        <p className="text-muted-foreground max-w-prose text-base md:text-lg">
-          We don&apos;t have any collections yet. But you can make some of yours
-          and share with the world from the{" "}
-          <Link
-            to="/upload"
-            className="text-foreground! whitespace-nowrap underline underline-offset-4"
-          >
-            Upload page
-          </Link>
-        </p>
+        <div>
+          <h1 className="font-heading mb-2 text-4xl font-bold">Ummm...</h1>
+          <p className="text-muted-foreground max-w-prose text-base md:text-lg">
+            We don&apos;t have any collections yet. But you can make some of
+            yours and share with the world from the{" "}
+            <Link
+              to="/upload"
+              className="text-foreground! whitespace-nowrap underline underline-offset-4"
+            >
+              Upload page
+            </Link>
+          </p>
+        </div>
       </div>
     )
 

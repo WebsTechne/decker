@@ -15,7 +15,11 @@ import {
 import { Spinner } from "#/components/ui/spinner"
 import { authClient } from "#/lib/auth-client"
 import { cn } from "#/lib/utils"
-import { getCollectionById, type CollectionData } from "#/server/collections"
+import {
+  getCollectionById,
+  toggleSaveCollection,
+  type CollectionData,
+} from "#/server/collections"
 import {
   ArrowLeft01Icon,
   ArrowLeft02Icon,
@@ -34,7 +38,7 @@ import {
   Link,
   useRouter,
 } from "@tanstack/react-router"
-import { useEffect, useState, type KeyboardEvent } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 export const Route = createFileRoute("/collections/$collectionId")({
@@ -74,7 +78,7 @@ const ThemeToggle = ({ className }: { className?: string }) => {
   )
 }
 
-type Author = {
+export type Author = {
   id: string
   image: string | null
   username: string
@@ -87,7 +91,7 @@ type Author = {
     name: string
   } | null
 }
-type Contributor = { user: Author }
+export type Contributor = { user: Author }
 
 const AuthorInfo = ({
   author,
@@ -111,7 +115,9 @@ const AuthorInfo = ({
           >
             {allContributors!.map((c, i) => (
               <Avatar key={c.user.username + i}>
-                <AvatarImage src={c.user.image ?? ""} alt={c.user.username} />
+                {c.user.image && (
+                  <AvatarImage src={c.user.image} alt={c.user.username} />
+                )}
                 <AvatarFallback>
                   {author.username.charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -123,14 +129,14 @@ const AuthorInfo = ({
               {allContributors!.map((c) => (
                 <Link
                   key={c.user.id}
-                  to={`/u/${c.user.username}`}
+                  to={`/u/$username`}
+                  params={{ username: c.user.username }}
                   className="hover:bg-muted flex items-start gap-2 rounded-md p-2"
                 >
                   <Avatar className="size-6">
-                    <AvatarImage
-                      src={c.user.image ?? ""}
-                      alt={c.user.username}
-                    />
+                    {c.user.image && (
+                      <AvatarImage src={c.user.image} alt={c.user.username} />
+                    )}
                     <AvatarFallback>
                       {c.user.username.charAt(0).toUpperCase()}
                     </AvatarFallback>
@@ -150,7 +156,9 @@ const AuthorInfo = ({
         <Popover>
           {" "}
           <PopoverTrigger nativeButton={false} render={<Avatar />}>
-            <AvatarImage src={author.image ?? ""} alt={author.username} />
+            {author.image && (
+              <AvatarImage src={author.image} alt={author.username} />
+            )}
             <AvatarFallback>
               {author.username.charAt(0).toUpperCase()}
             </AvatarFallback>
@@ -158,11 +166,14 @@ const AuthorInfo = ({
           <PopoverContent className="w-max rounded-lg! p-2!">
             <Link
               key={author.id}
-              to={`/u/${author.username}`}
+              to="/u/$username"
+              params={{ username: author.username }}
               className="hover:bg-muted flex items-center gap-2 rounded-md p-2"
             >
               <Avatar className="size-7">
-                <AvatarImage src={author.image ?? ""} alt={author.username} />
+                {author.image && (
+                  <AvatarImage src={author.image} alt={author.username} />
+                )}
                 <AvatarFallback>
                   {author.username.charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -184,7 +195,8 @@ const AuthorInfo = ({
       ) : (
         <Link
           className="underline-offset-4 hover:underline"
-          to={`/u/${author.username}`}
+          to="/u/$username"
+          params={{ username: author.username }}
         >
           {author.username}
         </Link>
@@ -231,26 +243,30 @@ const CollectionInfo = ({
 
 function RouteComponent() {
   const router = useRouter()
-  const { data: session, isPending } = authClient.useSession()
+  const { data: session, isPending: authPending } = authClient.useSession()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const { collectionId } = useParams({ from: "/collections/$collectionId" })
-  const {
-    data: collection,
-    isLoading,
-    isPending: isCollectionPending,
-  } = useQuery({
+  const { data: collection, isPending } = useQuery({
     queryKey: ["collection", collectionId],
     queryFn: () => getCollectionById({ data: { collectionId } }),
-    enabled: !!session && !isPending,
+    enabled: !!session && !authPending,
 
     staleTime: Infinity,
   })
 
+  const [isSaved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (collection) {
+      setSaved(collection.saves.length > 0)
+    }
+  }, [collection])
+
   useEffect(() => {
     if (lightboxIndex === null || !collection?.pages) return
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       switch (event.key) {
         case "Escape":
           setLightboxIndex(null)
@@ -279,7 +295,7 @@ function RouteComponent() {
     }
   }, [lightboxIndex, collection?.pages])
 
-  if (isPending)
+  if (authPending || isPending)
     return (
       <div className="flex-center h-dvh">
         <Spinner className="size-7" />
@@ -305,13 +321,6 @@ function RouteComponent() {
             page
           </p>
         </div>
-      </div>
-    )
-
-  if (isCollectionPending || isLoading)
-    return (
-      <div className="flex-center h-dvh">
-        <Spinner className="size-7" />
       </div>
     )
 
@@ -346,12 +355,36 @@ function RouteComponent() {
     toast("This action is not available")
   }
 
+  const handleToggleSave = async () => {
+    if (isMine) return
+
+    const previousValue = isSaved
+
+    // optimistic update
+    setSaved(!previousValue)
+
+    try {
+      await toggleSaveCollection({ data: { collectionId } })
+    } catch {
+      // rollback if server fails
+      setSaved(previousValue)
+      toast.error("Failed to update save")
+    }
+  }
+
   const {
     author,
     contributors,
     pages,
-    _count: { comments: commentsCount, pages: pagesCount, saves: savesCount },
+    _count: {
+      comments: commentsCount,
+      pages: pagesCount,
+      saves: rawSavesCount,
+    },
   } = collection
+
+  const savesCount =
+    rawSavesCount + (isSaved ? 1 : 0) - (collection.saves.length > 0 ? 1 : 0)
 
   const isMine = session.user.id === author.id
 
@@ -387,8 +420,13 @@ function RouteComponent() {
             <button
               className="disabled:text-muted-foreground flex flex-col items-center gap-1"
               disabled={isMine}
+              onClick={handleToggleSave}
             >
-              <HugeiconsIcon icon={Bookmark02Icon} strokeWidth={2} />
+              <HugeiconsIcon
+                icon={Bookmark02Icon}
+                strokeWidth={2}
+                fill={isSaved ? "var(--foreground)" : "transparent"}
+              />
               {savesCount}
             </button>
             <button className="flex flex-col items-center gap-1">
@@ -558,8 +596,13 @@ function RouteComponent() {
               <button
                 className="disabled:text-muted-foreground flex items-center gap-1"
                 disabled={isMine}
+                onClick={handleToggleSave}
               >
-                <HugeiconsIcon icon={Bookmark02Icon} strokeWidth={2} />
+                <HugeiconsIcon
+                  icon={Bookmark02Icon}
+                  fill={isSaved ? "var(--foreground)" : "transparent"}
+                  strokeWidth={2}
+                />
                 {savesCount}
               </button>
               <button className="flex items-center gap-1">

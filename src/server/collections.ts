@@ -200,6 +200,103 @@ const getCollectionList = createServerFn({ method: "GET" }).handler(
   },
 )
 
+const getMyCollections = createServerFn({ method: "GET" }).handler(async () => {
+  const session = await getSession()
+  if (!session) throw new Error("Unauthorized")
+
+  try {
+    const collections = await prisma.collection.findMany({
+      where: { authorId: session.user.id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            image: true,
+            department: { select: { id: true, name: true } },
+            school: { select: { id: true, name: true } },
+          },
+        },
+        tags: { include: { tag: true } },
+        saves: {
+          where: { userId: session.user.id },
+          take: 1,
+        },
+        contributors: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                image: true,
+                username: true,
+                school: { select: { id: true, name: true } },
+                department: { select: { id: true, name: true } },
+              },
+            },
+          },
+          orderBy: { addedAt: "asc" },
+        },
+        _count: { select: { saves: true, pages: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    if (!collections) return null
+    return collections
+  } catch (err) {
+    console.error("❌ getCollectionById error:", err)
+    throw err
+  }
+})
+
+const getSavedCollections = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const session = await getSession()
+    if (!session) throw new Error("Unauthorized")
+
+    return prisma.save.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      include: {
+        collection: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                image: true,
+                department: { select: { id: true, name: true } },
+                school: { select: { id: true, name: true } },
+              },
+            },
+            tags: { include: { tag: true } },
+            saves: {
+              where: { userId: session.user.id },
+              take: 1,
+            },
+            contributors: {
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    image: true,
+                    username: true,
+                    school: { select: { id: true, name: true } },
+                    department: { select: { id: true, name: true } },
+                  },
+                },
+              },
+              orderBy: { addedAt: "asc" },
+            },
+            _count: { select: { saves: true, pages: true } },
+          },
+        },
+      },
+    })
+  },
+)
+
 type CollectionListData = Prisma.CollectionGetPayload<{
   include: {
     author: {
@@ -230,6 +327,41 @@ type CollectionListData = Prisma.CollectionGetPayload<{
   }
 }>
 
+const toggleSaveCollection = createServerFn({ method: "GET" })
+  .inputValidator((data: { collectionId: string }) => data)
+  .handler(async ({ data }) => {
+    const session = await getSession()
+    if (!session) throw new Error("Unauthorized")
+
+    const existingSave = await prisma.save.findUnique({
+      where: {
+        userId_collectionId: {
+          userId: session.user.id,
+          collectionId: data.collectionId,
+        },
+      },
+    })
+
+    if (existingSave)
+      await prisma.save.delete({
+        where: {
+          userId_collectionId: {
+            userId: session.user.id,
+            collectionId: data.collectionId,
+          },
+        },
+      })
+    else
+      await prisma.save.create({
+        data: {
+          userId: session.user.id,
+          collectionId: data.collectionId,
+        },
+      })
+
+    return { saved: true }
+  })
+
 export type { CollectionData, CollectionListData }
 export {
   createCollection,
@@ -237,4 +369,7 @@ export {
   deleteCollection,
   getCollectionById,
   getCollectionList,
+  getMyCollections,
+  getSavedCollections,
+  toggleSaveCollection,
 }

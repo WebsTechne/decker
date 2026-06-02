@@ -54,7 +54,7 @@ function AvatarBtn({ session }: { session: ServerSession }) {
         <AvatarFallback>
           {(username ?? "").charAt(0).toUpperCase()}
         </AvatarFallback>
-        <AvatarImage src={image ?? ""} alt={username ?? ""} />
+        {image && <AvatarImage src={image} alt={username ?? ""} />}
       </DropdownMenuTrigger>
       <DropdownMenuContent sideOffset={10} className="min-w-37.5">
         <DropdownMenuItem
