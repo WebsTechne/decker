@@ -191,10 +191,9 @@ const getCollectionList = createServerFn({ method: "GET" }).handler(
         orderBy: { createdAt: "desc" },
       })
 
-      if (!collections) return null
       return collections
     } catch (err) {
-      console.error("❌ getCollectionById error:", err)
+      console.error("❌ getCollectionList error:", err)
       throw err
     }
   },
@@ -241,10 +240,9 @@ const getMyCollections = createServerFn({ method: "GET" }).handler(async () => {
       orderBy: { createdAt: "desc" },
     })
 
-    if (!collections) return null
     return collections
   } catch (err) {
-    console.error("❌ getCollectionById error:", err)
+    console.error("❌ getMyCollections error:", err)
     throw err
   }
 })
@@ -254,46 +252,53 @@ const getSavedCollections = createServerFn({ method: "GET" }).handler(
     const session = await getSession()
     if (!session) throw new Error("Unauthorized")
 
-    return prisma.save.findMany({
-      where: {
-        userId: session.user.id,
-      },
-      include: {
-        collection: {
-          include: {
-            author: {
-              select: {
-                id: true,
-                username: true,
-                image: true,
-                department: { select: { id: true, name: true } },
-                school: { select: { id: true, name: true } },
-              },
-            },
-            tags: { include: { tag: true } },
-            saves: {
-              where: { userId: session.user.id },
-              take: 1,
-            },
-            contributors: {
-              select: {
-                user: {
-                  select: {
-                    id: true,
-                    image: true,
-                    username: true,
-                    school: { select: { id: true, name: true } },
-                    department: { select: { id: true, name: true } },
-                  },
+    try {
+      const saves = await prisma.save.findMany({
+        where: {
+          userId: session.user.id,
+        },
+        include: {
+          collection: {
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                  image: true,
+                  department: { select: { id: true, name: true } },
+                  school: { select: { id: true, name: true } },
                 },
               },
-              orderBy: { addedAt: "asc" },
+              tags: { include: { tag: true } },
+              saves: {
+                where: { userId: session.user.id },
+                take: 1,
+              },
+              contributors: {
+                select: {
+                  user: {
+                    select: {
+                      id: true,
+                      image: true,
+                      username: true,
+                      school: { select: { id: true, name: true } },
+                      department: { select: { id: true, name: true } },
+                    },
+                  },
+                },
+                orderBy: { addedAt: "asc" },
+              },
+              _count: { select: { saves: true, pages: true } },
             },
-            _count: { select: { saves: true, pages: true } },
           },
         },
-      },
-    })
+      })
+
+      return saves.map((s) => s.collection)
+    } catch (err) {
+      console.error("❌ getSavedCollections error:", err)
+      throw err
+    }
   },
 )
 
