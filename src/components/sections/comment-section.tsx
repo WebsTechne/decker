@@ -17,6 +17,8 @@ import { createComment, getComments } from "#/server/comments"
 import { formatListTimestamp } from "#/lib/format-timestamp"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { SentIcon } from "@hugeicons/core-free-icons"
+import { useIsMobile } from "#/hooks/use-mobile"
+import { ScrollArea } from "../ui/scroll-area"
 
 export function CommentsSheet({
   collectionId,
@@ -29,6 +31,7 @@ export function CommentsSheet({
 }) {
   const { data: session } = authClient.useSession()
   const queryClient = useQueryClient()
+  const isMobile = useIsMobile()
   const [body, setBody] = useState("")
 
   const { data: comments = [], isLoading } = useQuery({
@@ -61,45 +64,49 @@ export function CommentsSheet({
         </SheetHeader>
 
         {/* comment list */}
-        <div className="flex-1 space-y-4 overflow-y-auto py-4">
-          {isLoading && (
-            <div className="flex-center h-20">
-              <Spinner className="size-7" />
-            </div>
-          )}
-          {!isLoading && comments.length === 0 && (
-            <p className="text-muted-foreground py-8 text-center text-sm">
-              No comments yet. Be the first!
-            </p>
-          )}
-          {comments.map((comment) => (
-            <div key={comment.id} className="flex gap-3">
-              <Avatar className="size-8 shrink-0">
-                <AvatarImage src={comment.user.image ?? ""} />
-                <AvatarFallback>
-                  {comment.user.username.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">
-                    {comment.user.username}
-                  </span>
-                  {comment.pinned && (
-                    <span className="text-primary text-xs">Author</span>
-                  )}
-                  <span className="text-muted-foreground ml-auto text-xs">
-                    {formatListTimestamp({
-                      createdAt: comment.createdAt,
-                      now: new Date(),
-                    })}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-sm wrap-break-word">{comment.body}</p>
+        <ScrollArea className="flex-1">
+          <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4">
+            {isLoading && (
+              <div className="flex-center h-20">
+                <Spinner className="size-7" />
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+            {!isLoading && comments.length === 0 && (
+              <p className="text-muted-foreground py-8 text-center text-sm">
+                No comments yet. Be the first!
+              </p>
+            )}
+            {comments.map((comment) => (
+              <div key={comment.id} className="flex gap-3">
+                <Avatar className="size-8 shrink-0">
+                  <AvatarImage src={comment.user.image ?? ""} />
+                  <AvatarFallback>
+                    {comment.user.username.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground text-sm font-medium">
+                      {comment.user.username}
+                    </span>
+                    {comment.pinned && (
+                      <span className="text-primary text-xs">Author</span>
+                    )}
+                    <span className="text-muted-foreground ml-auto text-xs">
+                      {formatListTimestamp({
+                        createdAt: comment.createdAt,
+                        now: new Date(),
+                      })}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-sm wrap-break-word">
+                    {comment.body}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
 
         {/* input */}
         {session && (
