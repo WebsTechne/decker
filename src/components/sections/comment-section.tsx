@@ -110,7 +110,7 @@ export function CommentsSheet({
   if (isMobile) {
     return (
       <Drawer direction="bottom" open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
+        <DrawerContent lassName="min-h-90">
           <DrawerHeader className="text-left">
             <DrawerTitle className="text-lg">Comments</DrawerTitle>
           </DrawerHeader>
