@@ -1,11 +1,24 @@
-import { AuthorInfo } from "#/components/author-info"
+import { AuthorInfo } from "#/components/sections/author-info"
+import { DropZone } from "#/components/form/drop-zone"
 import { ThemeToggle } from "#/components/theme-toggle"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "#/components/ui/alert-dialog"
 import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
+import { Field, FieldGroup } from "#/components/ui/field"
 import { Spinner } from "#/components/ui/spinner"
 import { authClient } from "#/lib/auth-client"
+import { uploadPages } from "#/lib/upload"
 import { cn } from "#/lib/utils"
 import {
+  createPages,
   getCollectionById,
   toggleSaveCollection,
   type CollectionData,
@@ -18,10 +31,11 @@ import {
   Comment01Icon,
   File02Icon,
   PencilEdit02Icon,
+  Plus,
   Share08Icon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createFileRoute,
   useParams,
@@ -30,9 +44,10 @@ import {
 } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { CommentsSheet } from "#/components/sections/comment-section"
 
 export const Route = createFileRoute("/collections/$collectionId")({
-  component: RouteComponent,
+  component: CollectionIdComponent,
 })
 
 export type Author = {
@@ -90,10 +105,15 @@ const CollectionInfo = ({
   </div>
 )
 
-function RouteComponent() {
+function CollectionIdComponent() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { data: session, isPending: authPending } = authClient.useSession()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+  const [uploadFiles, setUploadFiles] = useState<File[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [commentsOpen, setCommentsOpen] = useState(false)
 
   const { collectionId } = useParams({ from: "/collections/$collectionId" })
   const { data: collection, isPending } = useQuery({
@@ -234,8 +254,58 @@ function RouteComponent() {
 
   const savesCount =
     rawSavesCount + (isSaved ? 1 : 0) - (collection.saves.length > 0 ? 1 : 0)
+  const isMine =
+    session.user.id === author.id ||
+    contributors.some((c) => c.user.id === session.user.id)
 
-  const isMine = session.user.id === author.id
+  const handleAddPages = async () => {
+    if (uploadFiles.length === 0) {
+      toast.warning("Add at least one image")
+      return
+    }
+
+    setIsUploading(true)
+    toast.loading("Uploading pages...", { id: "add-pages-toast" })
+
+    try {
+      const uploaded = await uploadPages(
+        uploadFiles,
+        collectionId,
+        pages.length,
+        (done, total) => {
+          toast.loading(`Uploading ${done} of ${total}...`, {
+            id: "add-pages-toast",
+          })
+        },
+      )
+
+      await createPages({
+        data: {
+          collectionId,
+          pages: uploaded.map(({ url, position, width, height }) => ({
+            imageUrl: url,
+            position,
+            width,
+            height,
+          })),
+        },
+      })
+
+      toast.dismiss("add-pages-toast")
+      toast.success("Pages added!")
+      setUploadDialogOpen(false)
+      setUploadFiles([])
+
+      // refetch collection to show new pages
+      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] })
+    } catch (err) {
+      console.error(err)
+      toast.dismiss("add-pages-toast")
+      toast.error("Failed to upload pages")
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   return (
     <>
@@ -262,7 +332,10 @@ function RouteComponent() {
               <HugeiconsIcon icon={File02Icon} strokeWidth={2} />
               {pagesCount}
             </span>
-            <button className="flex flex-col items-center gap-1">
+            <button
+              className="flex flex-col items-center gap-1"
+              onClick={() => setCommentsOpen(true)}
+            >
               <HugeiconsIcon icon={Comment01Icon} strokeWidth={2} />
               {commentsCount}
             </button>
@@ -431,14 +504,33 @@ function RouteComponent() {
                 </div>
               ))}
             </div>
+
+            {isMine && (
+              <Button
+                size="icon-lg"
+                className="hover:bg-primary! hover:ring-primary/40 fixed right-4! bottom-4 z-1020 rounded-full shadow-lg not-md:bottom-14 hover:ring-3 active:scale-90 md:size-13!"
+                onClick={() => setUploadDialogOpen(true)}
+              >
+                <HugeiconsIcon
+                  icon={Plus}
+                  strokeWidth={2}
+                  className="size-6!"
+                />
+              </Button>
+            )}
           </main>
+
+          {/* bottombar in smaller screens */}
           <nav className="bg-background sticky right-0 bottom-0 left-0 z-1000 flex h-max border-t md:hidden">
             <ul className="flex-evenly h-12 w-full gap-10 px-4 py-2">
               <span className="bg-muted/40 text-muted-foreground flex items-center justify-start gap-1 rounded-full border p-1 px-3! select-none">
                 <HugeiconsIcon icon={File02Icon} strokeWidth={2} />
                 {pagesCount}
               </span>
-              <button className="flex items-center gap-1">
+              <button
+                className="flex items-center gap-1"
+                onClick={() => setCommentsOpen(true)}
+              >
                 <HugeiconsIcon icon={Comment01Icon} strokeWidth={2} />
                 {commentsCount}
               </button>
@@ -461,6 +553,47 @@ function RouteComponent() {
           </nav>
         </section>
       </div>
+
+      <AlertDialog
+        open={uploadDialogOpen}
+        onOpenChange={(open) => {
+          setUploadDialogOpen(open)
+          if (!open) setUploadFiles([])
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add pages</AlertDialogTitle>
+          </AlertDialogHeader>
+          <FieldGroup>
+            <Field>
+              <DropZone
+                multiple
+                startIndex={pages.length}
+                onFiles={(files) => setUploadFiles(files)}
+              />
+            </Field>
+          </FieldGroup>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isUploading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isUploading || uploadFiles.length === 0}
+              onClick={(e) => {
+                e.preventDefault()
+                handleAddPages()
+              }}
+            >
+              {isUploading ? (
+                <>
+                  <Spinner /> Uploading...
+                </>
+              ) : (
+                "Upload"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {lightboxIndex !== null && (
         <div
@@ -515,6 +648,12 @@ function RouteComponent() {
           </span>
         </div>
       )}
+
+      <CommentsSheet
+        collectionId={collectionId}
+        open={commentsOpen}
+        onOpenChange={setCommentsOpen}
+      />
     </>
   )
 }

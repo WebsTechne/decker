@@ -15,11 +15,13 @@ function DropZone({
   onClear,
   preview,
   multiple = false,
+  startIndex = 0,
 }: {
   onFiles: (files: File[]) => void
   onClear?: () => void
   preview?: File
   multiple?: boolean
+  startIndex?: number
 }) {
   const inputId = useId()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -40,7 +42,9 @@ function DropZone({
   )
 
   const addFiles = (incoming: File[]) => {
-    const imageFiles = incoming.filter((f) => f.type.startsWith("image/"))
+    const imageFiles = incoming.filter(
+      (f) => f.type.startsWith("image/") && f.type !== "image/svg+xml",
+    )
 
     const wayTooLarge = imageFiles.filter((f) => f.size > HARD_LIMIT_BYTES)
     const validFiles = imageFiles.filter((f) => f.size <= HARD_LIMIT_BYTES)
@@ -68,7 +72,7 @@ function DropZone({
   }
 
   return (
-    <section className="flex flex-col gap-2">
+    <section className="flex w-full flex-col gap-2">
       {/* Single preview */}
       {!multiple && previewUrl && (
         <div className="relative size-max">
@@ -118,7 +122,7 @@ function DropZone({
                   <HugeiconsIcon icon={Cancel01Icon} size={12} />
                 </button>
                 <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1 text-xs text-white">
-                  {i + 1}
+                  {startIndex + i + 1}
                 </span>
               </div>
             ))}
@@ -130,7 +134,7 @@ function DropZone({
       {/* Lightbox */}
       {lightboxIndex !== null && (
         <div
-          className="fixed inset-0 z-9999 flex items-center justify-center bg-black/80"
+          className="fixed inset-0 z-9999 flex w-full! items-center justify-center bg-black/80"
           onClick={() => setLightboxIndex(null)}
         >
           <img
@@ -145,7 +149,7 @@ function DropZone({
             <Button
               variant="secondary"
               size="icon"
-              className="absolute top-1/2 left-1 -translate-y-1/2 disabled:pointer-events-auto! md:left-4"
+              className="fixed top-1/2 left-1 -translate-y-1/2 disabled:pointer-events-auto! md:left-4"
               disabled={!(lightboxIndex > 0)}
               onClick={(e) => {
                 e.stopPropagation()
@@ -163,7 +167,7 @@ function DropZone({
             <Button
               variant="secondary"
               size="icon"
-              className="absolute top-1/2 right-1 -translate-y-1/2 disabled:pointer-events-auto! md:right-4"
+              className="fixed top-1/2 right-1 -translate-y-1/2 disabled:pointer-events-auto! md:right-4"
               disabled={!(lightboxIndex < files.length - 1)}
               onClick={(e) => {
                 e.stopPropagation()
@@ -177,7 +181,7 @@ function DropZone({
               />
             </Button>
           )}
-          <span className="absolute bottom-4 text-sm text-white">
+          <span className="fixed bottom-4 text-sm text-white">
             {lightboxIndex + 1} / {files.length}
           </span>
         </div>

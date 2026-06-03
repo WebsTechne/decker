@@ -198,6 +198,7 @@ model Contributor {
 model Comment {
   id        String   @id @default(cuid())
   body      String
+  pinned    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

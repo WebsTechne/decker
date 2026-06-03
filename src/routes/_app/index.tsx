@@ -21,7 +21,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getMyCollections, getSavedCollections } from "#/server/collections"
 import { authClient } from "#/lib/auth-client"
 import { Spinner } from "#/components/ui/spinner"
-import { CollectionCard } from "#/components/collection-card"
+import { CollectionCard } from "#/components/sections/collection-card"
 
 export const Route = createFileRoute("/_app/")({ component: Home })
 
@@ -131,15 +131,45 @@ function Home() {
         </DropdownMenu>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-        {filteredCollections.map((collection) => (
-          <CollectionCard
-            key={collection.id}
-            collection={collection}
-            session={session}
-          />
-        ))}
-      </section>
+      {filteredCollections.length < 1 ? (
+        <section>
+          {currentFilter === "created" && (
+            <p className="rounded-md border border-dashed p-4">
+              You haven't created any collections yet.{" "}
+              <Link
+                to="/upload"
+                className="text-foreground! underline underline-offset-4"
+              >
+                Create one
+              </Link>
+              .
+            </p>
+          )}
+          {currentFilter === "saved" && (
+            <p className="rounded-md border border-dashed p-4">
+              You haven't saved any collections yet.{" "}
+              <Link
+                to="/explore"
+                className="text-foreground! underline underline-offset-4"
+              >
+                Explore collections
+              </Link>
+              .
+            </p>
+          )}
+          {currentFilter === "all" && <>No collections found.</>}
+        </section>
+      ) : (
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {filteredCollections.map((collection) => (
+            <CollectionCard
+              key={collection.id}
+              collection={collection}
+              session={session}
+            />
+          ))}
+        </section>
+      )}
     </>
   )
 }

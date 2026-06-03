@@ -20,7 +20,8 @@ async function compressIfNeeded(file: File, maxSizeMB: number): Promise<File> {
 
 async function uploadAvatar(file: File, userId: string) {
   const processed = await compressIfNeeded(file, AVATAR_MAX_MB)
-  const ext = processed.name.split(".").pop()?.toLowerCase() ?? "jpg"
+  const rawExt = file.name.split(".").pop()?.toLowerCase() ?? "jpg"
+  const ext = rawExt === "jpeg" ? "jpg" : rawExt // normalize jpeg → jpg
   const path = `${userId}/avatar.${ext}`
 
   const { data, error } = await supabase.storage
@@ -43,11 +44,15 @@ async function uploadAvatar(file: File, userId: string) {
 }
 
 async function uploadPage(file: File, collectionId: string, position: number) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
   const [processed, dimensions] = await Promise.all([
     compressIfNeeded(file, PAGE_MAX_MB),
     getImageDimensions(file), // get from original before compression
   ])
-  const ext = processed.name.split(".").pop()?.toLowerCase() ?? "jpg"
+  const rawExt = file.name.split(".").pop()?.toLowerCase() ?? "jpg"
+  const ext = rawExt === "jpeg" ? "jpg" : rawExt // normalize jpeg → jpg
   const path = `${collectionId}/${position}.${ext}`
 
   const { data, error } = await supabase.storage
@@ -72,13 +77,14 @@ async function uploadPage(file: File, collectionId: string, position: number) {
 async function uploadPages(
   files: File[],
   collectionId: string,
+  startPosition: number = 0,
   onProgress?: (uploaded: number, total: number) => void,
 ) {
   let uploaded = 0
 
   const results = await Promise.all(
     files.map(async (file, index) => {
-      const result = await uploadPage(file, collectionId, index)
+      const result = await uploadPage(file, collectionId, startPosition + index)
       uploaded++
       onProgress?.(uploaded, files.length)
       return result // 👈 return full result including width/height

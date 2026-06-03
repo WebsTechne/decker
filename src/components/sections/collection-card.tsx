@@ -6,9 +6,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card"
+} from "../ui/card"
 import { cn } from "#/lib/utils"
-import { Badge } from "./ui/badge"
+import { Badge } from "../ui/badge"
 import type { ServerSession } from "#/lib/types"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { AuthorInfo } from "./author-info"
@@ -53,7 +53,7 @@ function CollectionCard({
                 !isMine ? "bg-amber-300" : "bg-blue-300",
               )}
             >
-              {isMine ? "created" : "saved"}
+              {isMine ? "created" : isSaved ? "saved" : ""}
             </Badge>
           )}
         </div>
@@ -78,22 +78,11 @@ function CollectionCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-between py-0!">
-        {/* <div className="flex flex-1 items-center gap-1 overflow-x-hidden">
-          <Avatar className="size-7">
-            {author.image && (
-              <AvatarImage src={author.image} alt={author.username} />
-            )}
-            <AvatarFallback>
-              {author.username.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <span className="flex-1 truncate">{author.username}</span>
-        </div> */}
         <AuthorInfo
           author={author}
           contributors={contributors}
           bg="card"
-          className="flex-1 items-center gap-1 overflow-x-hidden"
+          className="flex-1 items-center gap-2 overflow-x-hidden"
         />
 
         <div className="flex-center text-muted-foreground gap-1 text-xs sm:text-sm">

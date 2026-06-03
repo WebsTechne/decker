@@ -111,6 +111,7 @@ function UploadPage() {
         const pages = await uploadPages(
           value.images,
           collection.id,
+          0,
           (uploaded, total) => {
             uploadedCount = uploaded
             toast.loading(`Uploading ${uploaded} of ${total} pages...`, {

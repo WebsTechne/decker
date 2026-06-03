@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from "./ui/avatar"
+import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from "../ui/avatar"
 import { File02Icon } from "@hugeicons/core-free-icons"
 import type { Author, Contributor } from "#/routes/collections/$collectionId"
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { Link } from "@tanstack/react-router"
 import { cn } from "#/lib/utils"
 

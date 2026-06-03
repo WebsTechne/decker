@@ -1,4 +1,4 @@
-import { CollectionCard } from "#/components/collection-card"
+import { CollectionCard } from "#/components/sections/collection-card"
 import { Button } from "#/components/ui/button"
 import {
   DropdownMenu,
