@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from "../ui/avatar"
-import { File02Icon } from "@hugeicons/core-free-icons"
 import type { Author, Contributor } from "#/routes/collections/$collectionId"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { Link } from "@tanstack/react-router"
@@ -60,14 +59,17 @@ const AuthorInfo = ({
                 >
                   <Avatar className="size-6">
                     {c.user.image && (
-                      <AvatarImage src={c.user.image} alt={c.user.username} />
+                      <AvatarImage
+                        src={c.user.image}
+                        alt={c.user.displayUsername}
+                      />
                     )}
                     <AvatarFallback>
                       {c.user.username.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start justify-center gap-1">
-                    <span>{c.user.username}</span>
+                    <span>{c.user.displayUsername}</span>
                     <span className="text-muted-foreground text-sm">
                       {c.user.school?.name} • {c.user.department?.name}
                     </span>
@@ -84,7 +86,7 @@ const AuthorInfo = ({
             render={<Avatar className="size-7" />}
           >
             {author.image && (
-              <AvatarImage src={author.image} alt={author.username} />
+              <AvatarImage src={author.image} alt={author.displayUsername} />
             )}
             <AvatarFallback>
               {author.username.charAt(0).toUpperCase()}
@@ -99,14 +101,17 @@ const AuthorInfo = ({
             >
               <Avatar className="size-7">
                 {author.image && (
-                  <AvatarImage src={author.image} alt={author.username} />
+                  <AvatarImage
+                    src={author.image}
+                    alt={author.displayUsername}
+                  />
                 )}
                 <AvatarFallback>
                   {author.username.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-start justify-center gap-1">
-                <span>{author.username}</span>
+                <span>{author.displayUsername}</span>
                 <span className="text-muted-foreground text-sm">
                   {author.school?.name} • {author.department?.name}
                 </span>
@@ -125,7 +130,7 @@ const AuthorInfo = ({
           to="/u/$username"
           params={{ username: author.username }}
         >
-          {author.username}
+          {author.displayUsername}
         </Link>
       )}
     </div>

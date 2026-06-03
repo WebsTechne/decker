@@ -54,6 +54,7 @@ export type Author = {
   id: string
   image: string | null
   username: string
+  displayUsername: string
   school: {
     id: string
     name: string
@@ -329,14 +330,14 @@ function CollectionIdComponent() {
 
           <ul className="flex-center h-full w-full flex-1 flex-col gap-10 px-4">
             <span className="bg-muted/40 text-muted-foreground flex flex-col items-center justify-start gap-1 rounded-full border p-2 select-none">
-              <HugeiconsIcon icon={File02Icon} strokeWidth={2} />
+              <HugeiconsIcon icon={File02Icon} strokeWidth={1.5} />
               {pagesCount}
             </span>
             <button
               className="flex flex-col items-center gap-1"
               onClick={() => setCommentsOpen(true)}
             >
-              <HugeiconsIcon icon={Comment01Icon} strokeWidth={2} />
+              <HugeiconsIcon icon={Comment01Icon} strokeWidth={1.5} />
               {commentsCount}
             </button>
             <button
@@ -346,13 +347,13 @@ function CollectionIdComponent() {
             >
               <HugeiconsIcon
                 icon={Bookmark02Icon}
-                strokeWidth={2}
+                strokeWidth={1.5}
                 fill={isSaved ? "var(--foreground)" : "transparent"}
               />
               {savesCount}
             </button>
             <button className="flex flex-col items-center gap-1">
-              <HugeiconsIcon icon={Share08Icon} strokeWidth={2} />
+              <HugeiconsIcon icon={Share08Icon} strokeWidth={1.5} />
             </button>
           </ul>
 
@@ -524,14 +525,14 @@ function CollectionIdComponent() {
           <nav className="bg-background sticky right-0 bottom-0 left-0 z-1000 flex h-max border-t md:hidden">
             <ul className="flex-evenly h-12 w-full gap-10 px-4 py-2">
               <span className="bg-muted/40 text-muted-foreground flex items-center justify-start gap-1 rounded-full border p-1 px-3! select-none">
-                <HugeiconsIcon icon={File02Icon} strokeWidth={2} />
+                <HugeiconsIcon icon={File02Icon} strokeWidth={1.5} />
                 {pagesCount}
               </span>
               <button
                 className="flex items-center gap-1"
                 onClick={() => setCommentsOpen(true)}
               >
-                <HugeiconsIcon icon={Comment01Icon} strokeWidth={2} />
+                <HugeiconsIcon icon={Comment01Icon} strokeWidth={1.5} />
                 {commentsCount}
               </button>
               <button
@@ -542,12 +543,12 @@ function CollectionIdComponent() {
                 <HugeiconsIcon
                   icon={Bookmark02Icon}
                   fill={isSaved ? "var(--foreground)" : "transparent"}
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                 />
                 {savesCount}
               </button>
               <button className="flex items-center gap-1">
-                <HugeiconsIcon icon={Share08Icon} strokeWidth={2} />
+                <HugeiconsIcon icon={Share08Icon} strokeWidth={1.5} />
               </button>
             </ul>
           </nav>

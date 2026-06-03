@@ -81,6 +81,7 @@ const getCollectionById = createServerFn({ method: "GET" })
             select: {
               id: true,
               username: true,
+              displayUsername: true,
               image: true,
               department: { select: { id: true, name: true } },
               school: { select: { id: true, name: true } },
@@ -99,6 +100,7 @@ const getCollectionById = createServerFn({ method: "GET" })
                   id: true,
                   image: true,
                   username: true,
+                  displayUsername: true,
                   school: { select: { id: true, name: true } },
                   department: { select: { id: true, name: true } },
                 },
@@ -124,6 +126,7 @@ type CollectionData = Prisma.CollectionGetPayload<{
       select: {
         id: true
         username: true
+        displayUsername: true
         image: true
         school: { select: { id: true; name: true } }
         department: { select: { id: true; name: true } }
@@ -139,6 +142,7 @@ type CollectionData = Prisma.CollectionGetPayload<{
             id: true
             image: true
             username: true
+            displayUsername: true
             school: { select: { id: true; name: true } }
             department: { select: { id: true; name: true } }
           }
@@ -162,6 +166,7 @@ const getCollectionList = createServerFn({ method: "GET" }).handler(
             select: {
               id: true,
               username: true,
+              displayUsername: true,
               image: true,
               department: { select: { id: true, name: true } },
               school: { select: { id: true, name: true } },
@@ -179,6 +184,7 @@ const getCollectionList = createServerFn({ method: "GET" }).handler(
                   id: true,
                   image: true,
                   username: true,
+                  displayUsername: true,
                   school: { select: { id: true, name: true } },
                   department: { select: { id: true, name: true } },
                 },
@@ -211,6 +217,7 @@ const getMyCollections = createServerFn({ method: "GET" }).handler(async () => {
           select: {
             id: true,
             username: true,
+            displayUsername: true,
             image: true,
             department: { select: { id: true, name: true } },
             school: { select: { id: true, name: true } },
@@ -228,6 +235,7 @@ const getMyCollections = createServerFn({ method: "GET" }).handler(async () => {
                 id: true,
                 image: true,
                 username: true,
+                displayUsername: true,
                 school: { select: { id: true, name: true } },
                 department: { select: { id: true, name: true } },
               },
@@ -264,6 +272,7 @@ const getSavedCollections = createServerFn({ method: "GET" }).handler(
                 select: {
                   id: true,
                   username: true,
+                  displayUsername: true,
                   image: true,
                   department: { select: { id: true, name: true } },
                   school: { select: { id: true, name: true } },
@@ -281,6 +290,7 @@ const getSavedCollections = createServerFn({ method: "GET" }).handler(
                       id: true,
                       image: true,
                       username: true,
+                      displayUsername: true,
                       school: { select: { id: true, name: true } },
                       department: { select: { id: true, name: true } },
                     },
@@ -308,6 +318,7 @@ type CollectionListData = Prisma.CollectionGetPayload<{
       select: {
         id: true
         username: true
+        displayUsername: true
         image: true
         school: { select: { id: true; name: true } }
         department: { select: { id: true; name: true } }
@@ -322,6 +333,7 @@ type CollectionListData = Prisma.CollectionGetPayload<{
             id: true
             image: true
             username: true
+            displayUsername: true
             school: { select: { id: true; name: true } }
             department: { select: { id: true; name: true } }
           }

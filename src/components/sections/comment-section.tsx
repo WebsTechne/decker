@@ -18,7 +18,6 @@ import { formatListTimestamp } from "#/lib/format-timestamp"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { SentIcon } from "@hugeicons/core-free-icons"
 import { useIsMobile } from "#/hooks/use-mobile"
-import { ScrollArea } from "../ui/scroll-area"
 import {
   Drawer,
   DrawerContent,
@@ -26,6 +25,111 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "../ui/drawer"
+import { Link } from "@tanstack/react-router"
+
+type Comment = {
+  id: string
+  body: string
+  pinned: boolean
+  createdAt: Date
+  user: {
+    username: string
+    displayUsername: string | null
+    image: string | null
+  }
+}
+
+function CommentsContent({
+  comments,
+  isLoading,
+}: {
+  comments: Comment[]
+  isLoading: boolean
+}) {
+  return (
+    <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto">
+      <div className="flex flex-1 flex-col gap-4 px-4">
+        {isLoading && (
+          <div className="flex-center h-20">
+            <Spinner className="size-7" />
+          </div>
+        )}
+        {!isLoading && comments.length === 0 && (
+          <p className="text-muted-foreground py-8 text-center text-sm">
+            No comments yet. Be the first!
+          </p>
+        )}
+        {comments.map((comment) => (
+          <div key={comment.id} className="flex items-start gap-3">
+            <Link
+              to="/u/$username"
+              params={{ username: comment.user.username }}
+              className="contents"
+            >
+              <Avatar className="shrink-0">
+                {comment.user.image && <AvatarImage src={comment.user.image} />}
+                <AvatarFallback>
+                  {comment.user.username.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground text-sm font-medium">
+                  {comment.user.displayUsername ?? comment.user.username}
+                </span>
+                {comment.pinned && (
+                  <span className="text-primary text-xs">Author</span>
+                )}
+                <span className="text-muted-foreground ml-auto text-xs">
+                  {formatListTimestamp({
+                    createdAt: comment.createdAt,
+                    now: new Date(),
+                  })}
+                </span>
+              </div>
+              <p className="mt-0.5 text-sm wrap-break-word">{comment.body}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CommentInput({
+  body,
+  setBody,
+  onSubmit,
+  isPending,
+}: {
+  body: string
+  setBody: (val: string) => void
+  onSubmit: () => void
+  isPending: boolean
+}) {
+  return (
+    <>
+      <Textarea
+        placeholder="Leave a comment..."
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        className="max-h-32 min-h-10 resize-none"
+        rows={4}
+        onPointerDownCapture={(e) => e.stopPropagation()} // 👈 prevents vaul from intercepting
+      />
+      <Button
+        type="button"
+        onClick={onSubmit}
+        disabled={isPending || !body.trim()}
+        className="self-end"
+      >
+        <HugeiconsIcon icon={SentIcon} strokeWidth={2} />
+        Post
+      </Button>
+    </>
+  )
+}
 
 export function CommentsSheet({
   collectionId,
@@ -63,81 +167,26 @@ export function CommentsSheet({
     mutation.mutate()
   }
 
-  const Content = () => {
-    return (
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4">
-        {isLoading && (
-          <div className="flex-center h-20">
-            <Spinner className="size-7" />
-          </div>
-        )}
-        {!isLoading && comments.length === 0 && (
-          <p className="text-muted-foreground py-8 text-center text-sm">
-            No comments yet. Be the first!
-          </p>
-        )}
-        {comments.map((comment) => (
-          <div key={comment.id} className="flex gap-3">
-            <Avatar className="size-8 shrink-0">
-              <AvatarImage src={comment.user.image ?? ""} />
-              <AvatarFallback>
-                {comment.user.username.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-sm font-medium">
-                  {comment.user.username}
-                </span>
-                {comment.pinned && (
-                  <span className="text-primary text-xs">Author</span>
-                )}
-                <span className="text-muted-foreground ml-auto text-xs">
-                  {formatListTimestamp({
-                    createdAt: comment.createdAt,
-                    now: new Date(),
-                  })}
-                </span>
-              </div>
-              <p className="mt-0.5 text-sm wrap-break-word">{comment.body}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
-
   if (isMobile) {
     return (
-      <Drawer direction="bottom" open={open} onOpenChange={onOpenChange}>
-        <DrawerContent lassName="min-h-90">
-          <DrawerHeader className="text-left">
+      <Drawer
+        direction="bottom"
+        open={open}
+        onOpenChange={onOpenChange}
+        repositionInputs={false}
+      >
+        <DrawerContent className="h-[90dvh] overflow-hidden has-[&_textarea:focus]:h-[50dvh]">
+          <DrawerHeader>
             <DrawerTitle className="text-lg">Comments</DrawerTitle>
           </DrawerHeader>
-          <ScrollArea className="flex-1">
-            <Content />
-          </ScrollArea>
-          <DrawerFooter className="flex flex-row! items-center gap-2">
-            <Textarea
-              placeholder="Leave a comment..."
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              className="max-h-32 min-h-10 resize-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSubmit()
-                }
-              }}
+          <CommentsContent comments={comments} isLoading={isLoading} />
+          <DrawerFooter className="sticky bottom-0 flex flex-row! items-center gap-2">
+            <CommentInput
+              body={body}
+              setBody={setBody}
+              onSubmit={handleSubmit}
+              isPending={mutation.isPending}
             />
-            <Button
-              onClick={handleSubmit}
-              disabled={mutation.isPending || !body.trim()}
-              className="self-end"
-            >
-              <HugeiconsIcon icon={SentIcon} strokeWidth={2} />
-              Post
-            </Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
@@ -152,33 +201,18 @@ export function CommentsSheet({
         </SheetHeader>
 
         {/* comment list */}
-        <ScrollArea className="flex-1">
-          <Content />
-        </ScrollArea>
+
+        <CommentsContent comments={comments} isLoading={isLoading} />
 
         {/* input */}
         {session && (
           <SheetFooter className="flex-row! items-center">
-            <Textarea
-              placeholder="Leave a comment..."
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              className="max-h-32 min-h-10 resize-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSubmit()
-                }
-              }}
+            <CommentInput
+              body={body}
+              setBody={setBody}
+              onSubmit={handleSubmit}
+              isPending={mutation.isPending}
             />
-            <Button
-              onClick={handleSubmit}
-              disabled={mutation.isPending || !body.trim()}
-              className="self-end"
-            >
-              <HugeiconsIcon icon={SentIcon} strokeWidth={2} />
-              Post
-            </Button>
           </SheetFooter>
         )}
       </SheetContent>

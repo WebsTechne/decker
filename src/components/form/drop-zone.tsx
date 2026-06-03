@@ -134,7 +134,7 @@ function DropZone({
       {/* Lightbox */}
       {lightboxIndex !== null && (
         <div
-          className="fixed inset-0 z-9999 flex w-full! items-center justify-center bg-black/80"
+          className="fixed top-1/2 left-1/2 z-9999 flex h-dvh w-dvw -translate-1/2 items-center justify-center bg-black/80"
           onClick={() => setLightboxIndex(null)}
         >
           <img

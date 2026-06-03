@@ -12,7 +12,12 @@ const getComments = createServerFn({ method: "GET" })
       where: { collectionId: data.collectionId },
       include: {
         user: {
-          select: { id: true, username: true, image: true },
+          select: {
+            id: true,
+            username: true,
+            displayUsername: true,
+            image: true,
+          },
         },
       },
       orderBy: [{ pinned: "desc" }, { createdAt: "asc" }],
@@ -47,7 +52,14 @@ const createComment = createServerFn({ method: "POST" })
         pinned: isAuthorOrContributor,
       },
       include: {
-        user: { select: { id: true, username: true, image: true } },
+        user: {
+          select: {
+            id: true,
+            username: true,
+            displayUsername: true,
+            image: true,
+          },
+        },
       },
     })
   })
