@@ -168,6 +168,11 @@ body {
   @apply flex items-center justify-evenly;
 }
 
+body:has(input:focus, textarea:focus) .bottom-bar {
+  transform: translateY(100%);
+  pointer-events: none; /* Prevents ghost clicks */
+}
+
 /* Desktop */
 @media (min-width: 768px) {
   .sidebar {

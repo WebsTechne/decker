@@ -45,6 +45,7 @@ function CollectionCard({
           <img
             src={bannerUrl ?? "/card-loading-skeleton-unsplash.jpg"}
             alt={name}
+            draggable={false}
           />
           {(isMine || isSaved) && (
             <Badge
