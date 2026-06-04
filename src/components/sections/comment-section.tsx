@@ -120,11 +120,17 @@ function CommentInput({
       />
       <Button
         type="button"
+        size="lg"
         onClick={onSubmit}
         disabled={isPending || !body.trim()}
         className="self-end"
       >
-        <HugeiconsIcon icon={SentIcon} strokeWidth={2} />
+        <HugeiconsIcon
+          icon={SentIcon}
+          strokeWidth={2}
+          fill="var(--primary-foreground)"
+          className="text-primary size-5!"
+        />
         Post
       </Button>
     </>
