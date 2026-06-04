@@ -175,7 +175,7 @@ export function CommentsSheet({
         onOpenChange={onOpenChange}
         repositionInputs={false}
       >
-        <DrawerContent className="h-[90dvh] overflow-hidden has-[textarea:focus]:h-[50dvh]">
+        <DrawerContent className="h-[90svh] overflow-hidden">
           <DrawerHeader>
             <DrawerTitle className="text-lg">Comments</DrawerTitle>
           </DrawerHeader>
