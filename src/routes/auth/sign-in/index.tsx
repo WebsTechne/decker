@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useForm, type ReactFormExtendedApi } from "@tanstack/react-form"
+import { useForm } from "@tanstack/react-form"
 import { useState } from "react"
 import {
   Card,
@@ -183,6 +183,12 @@ function SignIn() {
                   )
                 }}
               />
+
+              {error && (
+                <Field>
+                  <FieldError className="text-center">{error}</FieldError>
+                </Field>
+              )}
 
               <Field>
                 <Button

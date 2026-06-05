@@ -45,6 +45,7 @@ import {
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { CommentsSheet } from "#/components/sections/comment-section"
+import { EditCollectionSheet } from "#/components/sections/edit-collection-section"
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionIdComponent,
@@ -54,7 +55,7 @@ export type Author = {
   id: string
   image: string | null
   username: string
-  displayUsername: string
+  displayUsername: string | null
   school: {
     id: string
     name: string
@@ -115,6 +116,7 @@ function CollectionIdComponent() {
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [commentsOpen, setCommentsOpen] = useState(false)
+  const [editSectionOpen, setEditSectionOpen] = useState(false)
 
   const { collectionId } = useParams({ from: "/collections/$collectionId" })
   const { data: collection, isPending } = useQuery({
@@ -362,7 +364,7 @@ function CollectionIdComponent() {
               <Button
                 variant="ghost"
                 size="icon-lg"
-                onClick={actionNotAvailable}
+                onClick={() => setEditSectionOpen(true)}
               >
                 <HugeiconsIcon
                   icon={PencilEdit02Icon}
@@ -397,7 +399,7 @@ function CollectionIdComponent() {
                   <Button
                     variant="ghost"
                     size="icon-lg"
-                    onClick={actionNotAvailable}
+                    onClick={() => setEditSectionOpen(true)}
                   >
                     <HugeiconsIcon
                       icon={PencilEdit02Icon}
@@ -654,6 +656,12 @@ function CollectionIdComponent() {
         collectionId={collectionId}
         open={commentsOpen}
         onOpenChange={setCommentsOpen}
+      />
+
+      <EditCollectionSheet
+        collection={collection}
+        open={editSectionOpen}
+        onOpenChange={setEditSectionOpen}
       />
     </>
   )

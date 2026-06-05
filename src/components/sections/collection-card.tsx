@@ -13,6 +13,23 @@ import type { ServerSession } from "#/lib/types"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { AuthorInfo } from "./author-info"
 import { File02Icon } from "@hugeicons/core-free-icons"
+import { Skeleton } from "../ui/skeleton"
+
+function CollectionCardSkeleton() {
+  return (
+    <Card size="sm" className="pt-0!">
+      <div>
+        <Skeleton className="aspect-2/1 w-full" />
+      </div>
+      <CardHeader>
+        <Skeleton className="h-13.75 w-full rounded-lg" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-7 w-full rounded-lg" />
+      </CardContent>
+    </Card>
+  )
+}
 
 function CollectionCard({
   collection,
@@ -31,7 +48,9 @@ function CollectionCard({
     tags,
     _count,
   } = collection
-  const isMine = session!.user.id === author.id
+  if (!session) return <CollectionCardSkeleton />
+
+  const isMine = session.user.id === author.id
   const isSaved = saves.length > 0
 
   return (
@@ -97,4 +116,4 @@ function CollectionCard({
   )
 }
 
-export { CollectionCard }
+export { CollectionCardSkeleton, CollectionCard }
