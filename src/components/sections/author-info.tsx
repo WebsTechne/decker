@@ -43,7 +43,7 @@ const AuthorInfo = ({
                   <AvatarImage src={c.user.image} alt={c.user.username} />
                 )}
                 <AvatarFallback>
-                  {c.user.username.charAt(0).toUpperCase()}
+                  {c.user.username[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             ))}
@@ -65,7 +65,7 @@ const AuthorInfo = ({
                       />
                     )}
                     <AvatarFallback>
-                      {c.user.username.charAt(0).toUpperCase()}
+                      {c.user.username[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start justify-center gap-1">
@@ -88,9 +88,7 @@ const AuthorInfo = ({
             {author.image && (
               <AvatarImage src={author.image} alt={author.displayUsername} />
             )}
-            <AvatarFallback>
-              {author.username.charAt(0).toUpperCase()}
-            </AvatarFallback>
+            <AvatarFallback>{author.username[0].toUpperCase()}</AvatarFallback>
           </PopoverTrigger>
           <PopoverContent className="w-max rounded-lg! p-2!">
             <Link
@@ -107,7 +105,7 @@ const AuthorInfo = ({
                   />
                 )}
                 <AvatarFallback>
-                  {author.username.charAt(0).toUpperCase()}
+                  {author.username[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-start justify-center gap-1">

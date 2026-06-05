@@ -1,9 +1,19 @@
-import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarImage,
+} from "#/components/ui/avatar"
 import { Button } from "#/components/ui/button"
 import { Spinner } from "#/components/ui/spinner"
 import { authClient } from "#/lib/auth-client"
+import { cn } from "#/lib/utils"
 import { getProfileByUsername } from "#/server/profile"
-import { ArrowLeft02Icon, Edit02Icon } from "@hugeicons/core-free-icons"
+import {
+  ArrowLeft02Icon,
+  Edit02Icon,
+  File02Icon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useQuery } from "@tanstack/react-query"
 import {
@@ -62,8 +72,9 @@ function ProfilePage() {
     (sum, col) => sum + col._count.saves,
     0,
   )
-
   const isMine = session.user.username === username
+
+  const { image, collections, displayUsername, department, school } = profile
 
   return (
     <div className="relative">
@@ -97,7 +108,7 @@ function ProfilePage() {
         )}
       </header>
 
-      <main className="">
+      <main className="pb-4">
         <div className="bg-card flex-center relative h-50">
           <span className="bg-primary absolute inset-0 rounded-b-2xl" />
           <div className="bg-background absolute top-37.5 left-5 size-25 rounded-full p-1">
@@ -106,17 +117,20 @@ function ProfilePage() {
                 <AvatarImage src={profile.image} alt="avatar" />
               )}
               <AvatarFallback className="text-2xl!">
-                {username.charAt(0).toUpperCase()}
+                {username[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>
         </div>
-        <div className="bg-card flex flex-col gap-2 p-4 pt-14.5">
-          <span className="font-heading text-lg font-semibold">{username}</span>
+
+        <div className="bg-card mb-4 flex flex-col gap-2 p-4 pt-14.5">
+          <span className="font-heading text-lg font-semibold">
+            {displayUsername}
+          </span>
 
           <p className="text-muted-foreground mb-2 text-sm">
-            {profile.school?.name ?? "No school"} •{" "}
-            {profile.department?.name ?? "No department"}
+            {school?.name ?? "No school"} •{" "}
+            {department?.name ?? "No department"}
           </p>
 
           <div className="bg-border flex w-9/10 max-w-md gap-px">
@@ -146,6 +160,72 @@ function ProfilePage() {
             </div>
           </div>
         </div>
+
+        <p className="text-muted-foreground px-4 py-2">Collections</p>
+        <section className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {collections.map((col) => {
+            const { id: collectionId, contributors } = col
+            const hasContributors = contributors.length > 0
+            const allContributors = hasContributors
+              ? [{ user: { image, username } }, ...contributors]
+              : null
+
+            return (
+              <Link
+                key={col.id}
+                to="/collections/$collectionId"
+                params={{ collectionId }}
+                className="relative flex flex-col gap-2 overflow-clip rounded-xl border pb-2"
+              >
+                <div
+                  className={cn(
+                    "card-img z-1",
+                    !col.bannerUrl && "card-img-fallback",
+                  )}
+                >
+                  <img
+                    src={col.bannerUrl ?? "/card-loading-skeleton-unsplash.jpg"}
+                    alt={col.name}
+                    draggable={false}
+                  />
+                </div>
+
+                <div className="to-background via-background/60 absolute inset-0 z-2 bg-linear-to-b from-transparent" />
+
+                <div className="absolute bottom-0 z-3 flex w-full flex-col gap-1 p-2">
+                  <p className="truncate">{col.name}</p>
+                  <div className="flex-between">
+                    <AvatarGroup>
+                      {allContributors?.map((contributor) => (
+                        <Avatar
+                          key={contributor.user.username}
+                          className="size-6.5"
+                        >
+                          {contributor.user.image && (
+                            <AvatarImage
+                              src={contributor.user.image}
+                              alt={contributor.user.username}
+                            />
+                          )}
+                          <AvatarFallback>
+                            {contributor.user.username[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                    </AvatarGroup>
+
+                    <div className="flex-center text-muted-foreground gap-1 text-xs sm:text-sm">
+                      <HugeiconsIcon icon={File02Icon} size={16} />
+                      <span>
+                        {col._count.pages} page{col._count.pages !== 1 && "s"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
+        </section>
       </main>
     </div>
   )

@@ -60,9 +60,7 @@ function AvatarBtn({
         nativeButton={false}
         render={<Avatar className="cursor-pointer" />}
       >
-        <AvatarFallback>
-          {(username ?? "").charAt(0).toUpperCase()}
-        </AvatarFallback>
+        <AvatarFallback>{(username ?? "")[0].toUpperCase()}</AvatarFallback>
         {image && <AvatarImage src={image} alt={username ?? ""} />}
       </DropdownMenuTrigger>
       <DropdownMenuContent sideOffset={10} className="min-w-37.5">

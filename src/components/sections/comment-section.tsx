@@ -69,7 +69,7 @@ function CommentsContent({
               <Avatar className="shrink-0">
                 {comment.user.image && <AvatarImage src={comment.user.image} />}
                 <AvatarFallback>
-                  {comment.user.username.charAt(0).toUpperCase()}
+                  {comment.user.username[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </Link>
