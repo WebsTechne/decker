@@ -43,13 +43,13 @@ import {
   createPages,
   deleteCollection,
 } from "#/server/collections"
-import { getTags } from "#/server/tags"
+import { createTag, getTags } from "#/server/tags"
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useForm } from "@tanstack/react-form"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -66,6 +66,7 @@ const formSchema = z.object({
 
 function UploadPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const maxChars = 200
   const [chars, setChars] = useState(0)
@@ -177,6 +178,23 @@ function UploadPage() {
   }
 
   const anchor = useComboboxAnchor()
+  const comboboxChipsInputRef = useRef<HTMLInputElement | null>(null)
+
+  const handleCreateTag = async () => {
+    toast.loading("Creating tag...", { id: "create-tag-toast" })
+    try {
+      await createTag({
+        data: { tag: comboboxChipsInputRef.current?.value ?? "" },
+      })
+      queryClient.invalidateQueries({ queryKey: ["tags"] })
+      toast.dismiss("create-tag-toast")
+      toast.success("Tag created")
+    } catch (err) {
+      toast.dismiss("create-tag-toast")
+      toast.error("Failed to create tag.")
+      console.error("❌ createTag error:", err)
+    }
+  }
 
   return (
     <section className="flex h-auto flex-col gap-10 md:grid md:h-[calc(100dvh-48px)] md:grid-cols-[2fr_3fr] md:gap-4 md:overflow-clip">
@@ -321,30 +339,39 @@ function UploadPage() {
                                         </ComboboxChip>
                                       ),
                                     )}
-                                    <ComboboxChipsInput />
+                                    <ComboboxChipsInput
+                                      ref={comboboxChipsInputRef}
+                                    />
                                   </>
                                 )}
                               </ComboboxValue>
                             </ComboboxChips>
                             <ComboboxContent anchor={anchor}>
-                              <ComboboxEmpty>
-                                <Button variant="secondary" onClick={() => {}}>
-                                  Add tag
-                                </Button>
-                              </ComboboxEmpty>
-                              <ComboboxList>
-                                {isLoadingTags ? (
+                              {isLoadingTags ? (
+                                <ComboboxList>
                                   <div className="flex-center h-25 w-full">
                                     <Spinner />
                                   </div>
-                                ) : (
-                                  (tag) => (
-                                    <ComboboxItem key={tag.id} value={tag}>
-                                      {tag.name}
-                                    </ComboboxItem>
-                                  )
-                                )}
-                              </ComboboxList>
+                                </ComboboxList>
+                              ) : (
+                                <>
+                                  <ComboboxEmpty>
+                                    <Button
+                                      variant="secondary"
+                                      onClick={handleCreateTag}
+                                    >
+                                      Add tag
+                                    </Button>
+                                  </ComboboxEmpty>
+                                  <ComboboxList>
+                                    {(tag) => (
+                                      <ComboboxItem key={tag.id} value={tag}>
+                                        {tag.name}
+                                      </ComboboxItem>
+                                    )}
+                                  </ComboboxList>
+                                </>
+                              )}
                             </ComboboxContent>
                           </Combobox>
                         </Field>

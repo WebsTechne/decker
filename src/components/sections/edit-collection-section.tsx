@@ -1,5 +1,5 @@
-import type { CollectionData } from "#/server/collections"
-import { useEffect, useMemo, useState } from "react"
+import { updateCollection, type CollectionData } from "#/server/collections"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import {
   Sheet,
@@ -39,7 +39,7 @@ import {
 } from "#/components/ui/combobox"
 import { toast } from "sonner"
 import { z } from "zod"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createTag, getTags } from "#/server/tags"
 import { Spinner } from "../ui/spinner"
 import {
@@ -77,6 +77,7 @@ function EditCollectionSheet({
     queryFn: getTags,
   })
 
+  const queryClient = useQueryClient()
   const currentTagIds = collection.tags.map((t) => t.tagId)
   const [selectedTags, setSelectedTags] = useState<typeof tags>([])
   const [confirmCancelOpen, setConfirmCancelOpen] = useState(false)
@@ -105,8 +106,37 @@ function EditCollectionSheet({
         }
       },
     },
-    onSubmit: async ({ value }) => {},
+    onSubmit: async ({ value }) => {
+      toast.loading("Updating collection...", { id: "update-collection-toast" })
+      const collectionId = collection.id
+      const { name, description, tags: tagIds } = value
+
+      try {
+        await updateCollection({
+          data: { collectionId, name, description, tagIds },
+        })
+        toast.dismiss("update-collection-toast")
+        toast.success("Collection updated!")
+        onOpenChange(false)
+        queryClient.invalidateQueries({
+          queryKey: ["collections"],
+        })
+      } catch (err) {
+        console.error(err)
+        toast.dismiss("update-collection-toast")
+        toast.error("Failed to update collection")
+      }
+    },
   })
+
+  useEffect(() => {
+    form.reset({
+      name: collection.name,
+      description: collection.description ?? "",
+      tags: collection.tags.map((t) => t.tagId),
+      images: [],
+    })
+  }, [collection])
 
   const isDirty = useStore(form.store, (state) => {
     const current = state.values
@@ -134,6 +164,23 @@ function EditCollectionSheet({
   }
 
   const anchor = useComboboxAnchor()
+  const comboboxChipsInputRef = useRef<HTMLInputElement | null>(null)
+
+  const handleCreateTag = async () => {
+    toast.loading("Creating tag...", { id: "create-tag-toast" })
+    try {
+      await createTag({
+        data: { tag: comboboxChipsInputRef.current?.value ?? "" },
+      })
+      queryClient.invalidateQueries({ queryKey: ["tags"] })
+      toast.dismiss("create-tag-toast")
+      toast.success("Tag created")
+    } catch (err) {
+      toast.dismiss("create-tag-toast")
+      toast.error("Failed to create tag.")
+      console.error("❌ createTag error:", err)
+    }
+  }
 
   return (
     <>
@@ -147,7 +194,11 @@ function EditCollectionSheet({
           }
         }}
       >
-        <SheetContent side="left">
+        <SheetContent
+          side="left"
+          showCloseButton={false}
+          className="w-full! not-md:max-w-md!"
+        >
           <SheetHeader>
             <SheetTitle className="text-lg">Edit Collection</SheetTitle>
             <SheetDescription className="text-base">
@@ -287,7 +338,9 @@ function EditCollectionSheet({
                                         </ComboboxChip>
                                       ),
                                     )}
-                                    <ComboboxChipsInput />
+                                    <ComboboxChipsInput
+                                      ref={comboboxChipsInputRef}
+                                    />
                                   </>
                                 )}
                               </ComboboxValue>
@@ -304,9 +357,7 @@ function EditCollectionSheet({
                                   <ComboboxEmpty>
                                     <Button
                                       variant="secondary"
-                                      onClick={() =>
-                                        createTag({ data: { tag: "TEST_TAG" } })
-                                      }
+                                      onClick={handleCreateTag}
                                     >
                                       Add tag
                                     </Button>
@@ -337,7 +388,12 @@ function EditCollectionSheet({
             >
               Cancel
             </SheetClose>
-            <Button disabled={!isDirty || form.state.isSubmitting}>Save</Button>
+            <Button
+              disabled={!isDirty || form.state.isSubmitting}
+              onClick={() => form.handleSubmit()}
+            >
+              Save
+            </Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>

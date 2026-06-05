@@ -21,7 +21,10 @@ import { useQuery } from "@tanstack/react-query"
 import { getMyCollections, getSavedCollections } from "#/server/collections"
 import { authClient } from "#/lib/auth-client"
 import { Spinner } from "#/components/ui/spinner"
-import { CollectionCard } from "#/components/sections/collection-card"
+import {
+  CollectionCard,
+  CollectionCardSkeleton,
+} from "#/components/sections/collection-card"
 
 export const Route = createFileRoute("/_app/")({ component: Home })
 
@@ -31,8 +34,9 @@ function Home() {
     "all" | "created" | "saved"
   >("all")
 
-  const { data: libraryCollections, isPending } = useQuery({
+  const { data: libraryCollections = [], isPending } = useQuery({
     queryKey: ["collections", "library"],
+    enabled: !!session && !authPending,
     queryFn: async () => {
       const [myCollections, savedCollections] = await Promise.all([
         getMyCollections(),
@@ -46,14 +50,14 @@ function Home() {
     },
   })
 
-  if (authPending || isPending)
+  if (authPending)
     return (
       <div className="flex-center h-[calc(100dvh-48px-56px)]">
         <Spinner className="size-7" />
       </div>
     )
 
-  if (!libraryCollections || libraryCollections.length < 1)
+  if (!isPending && libraryCollections.length < 1)
     return (
       <div className="flex-center h-[calc(100dvh-48px-56px)] px-5">
         <div>
@@ -131,7 +135,13 @@ function Home() {
         </DropdownMenu>
       </section>
 
-      {filteredCollections.length < 1 ? (
+      {isPending ? (
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <CollectionCardSkeleton key={i} />
+          ))}
+        </section>
+      ) : filteredCollections.length < 1 ? (
         <section>
           {currentFilter === "created" && (
             <p className="rounded-md border border-dashed p-4">

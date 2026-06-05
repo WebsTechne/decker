@@ -19,13 +19,19 @@ function CollectionCardSkeleton() {
   return (
     <Card size="sm" className="pt-0!">
       <div>
-        <Skeleton className="aspect-2/1 w-full" />
+        <Skeleton className="aspect-2/1 w-full rounded-none!" />
       </div>
       <CardHeader>
-        <Skeleton className="h-13.75 w-full rounded-lg" />
+        {/* <Skeleton className="h-13.75 w-full rounded-lg" />*/}
+        <div className="flex h-13.75 w-full">
+          {/* <Skeleton className="size-7 rounded-full" /> */}
+        </div>
       </CardHeader>
       <CardContent>
-        <Skeleton className="h-7 w-full rounded-lg" />
+        {/* <Skeleton className="h-7 w-full rounded-lg" />*/}
+        <div className="flex h-7 w-full">
+          <Skeleton className="size-7 rounded-full" />
+        </div>
       </CardContent>
     </Card>
   )
@@ -80,11 +86,11 @@ function CollectionCard({
       </Link>
       <CardHeader className="gap-2">
         <CardTitle className="flex items-center gap-1">{name}</CardTitle>
-        <CardDescription className="flex items-center gap-2">
+        <CardDescription className="no-scrollbar flex items-center gap-2 overflow-x-auto">
           {tags.slice(0, 3).map((tag, tagIndex) => (
             <Badge
               key={`${tag.tagId}-${tagIndex}`}
-              className="h-max px-2 py-1 text-xs"
+              className="h-max shrink-0 px-2 py-1 text-xs"
               variant="secondary"
             >
               {tag.tag.name}

@@ -1,4 +1,7 @@
-import { CollectionCard } from "#/components/sections/collection-card"
+import {
+  CollectionCard,
+  CollectionCardSkeleton,
+} from "#/components/sections/collection-card"
 import { Button } from "#/components/ui/button"
 import {
   DropdownMenu,
@@ -33,21 +36,21 @@ function RouteComponent() {
     "all" | "created" | "saved"
   >("all")
 
-  const { data: collections, isPending } = useQuery({
-    queryKey: ["collectionsList"],
+  const { data: collections = [], isPending } = useQuery({
+    queryKey: ["collections", "list"],
     queryFn: () => getCollectionList(),
     enabled: !!session && !authPending,
     staleTime: 1000 * 60 * 60,
   })
 
-  if (authPending || isPending)
+  if (authPending)
     return (
       <div className="flex-center h-[calc(100dvh-48px-56px)]">
         <Spinner className="size-7" />
       </div>
     )
 
-  if (!collections)
+  if (!isPending && collections.length < 1)
     return (
       <div className="flex-center h-[calc(100dvh-48px-56px)] px-5">
         <div>
@@ -103,13 +106,17 @@ function RouteComponent() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-        {collections.map((collection) => (
-          <CollectionCard
-            key={collection.id}
-            collection={collection}
-            session={session}
-          />
-        ))}
+        {isPending
+          ? Array.from({ length: 3 }).map((_, i) => (
+              <CollectionCardSkeleton key={i} />
+            ))
+          : collections.map((collection) => (
+              <CollectionCard
+                key={collection.id}
+                collection={collection}
+                session={session}
+              />
+            ))}
       </section>
     </>
   )

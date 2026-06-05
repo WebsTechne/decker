@@ -25,6 +25,39 @@ const createCollection = createServerFn({ method: "POST" })
     })
   })
 
+const updateCollection = createServerFn({ method: "POST" })
+  .inputValidator(
+    (data: {
+      collectionId: string
+      name: string
+      description: string
+      tagIds: string[]
+    }) => data,
+  )
+  .handler(async ({ data }) => {
+    const session = await getSession()
+    if (!session) throw new Error("Unauthorized")
+
+    return prisma.collection.update({
+      where: { id: data.collectionId, authorId: session.user.id },
+      data: {
+        name: data.name,
+        description: data.description,
+        tags: {
+          deleteMany: {},
+
+          create: data.tagIds.map((tagId) => ({
+            tag: {
+              connect: {
+                id: tagId,
+              },
+            },
+          })),
+        },
+      },
+    })
+  })
+
 const createPages = createServerFn({ method: "POST" })
   .inputValidator(
     (data: {
@@ -388,5 +421,6 @@ export {
   getCollectionList,
   getMyCollections,
   getSavedCollections,
+  updateCollection,
   toggleSaveCollection,
 }
