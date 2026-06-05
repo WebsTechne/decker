@@ -163,7 +163,7 @@ export function CommentsSheet({
       setBody("")
       queryClient.invalidateQueries({ queryKey: ["comments", collectionId] })
       // also update comment count in collection
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] })
+      queryClient.invalidateQueries({ queryKey: ["collections", collectionId] })
     },
     onError: () => toast.error("Failed to post comment"),
   })

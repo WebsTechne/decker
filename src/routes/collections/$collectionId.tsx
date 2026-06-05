@@ -120,7 +120,7 @@ function CollectionIdComponent() {
 
   const { collectionId } = useParams({ from: "/collections/$collectionId" })
   const { data: collection, isPending } = useQuery({
-    queryKey: ["collection", collectionId],
+    queryKey: ["collections", collectionId],
     queryFn: () => getCollectionById({ data: { collectionId } }),
     enabled: !!session && !authPending,
 
@@ -300,7 +300,7 @@ function CollectionIdComponent() {
       setUploadFiles([])
 
       // refetch collection to show new pages
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] })
+      queryClient.invalidateQueries({ queryKey: ["collections", collectionId] })
     } catch (err) {
       console.error(err)
       toast.dismiss("add-pages-toast")
