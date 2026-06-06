@@ -198,12 +198,12 @@ function ProfilePage() {
                   />
                 </div>
 
-                <div className="to-background via-background/60 absolute inset-0 z-2 bg-linear-to-b from-transparent" />
+                <div className="to-background via-background/60 not-dark:to-foreground! not-dark:via-foreground/60! absolute inset-0 z-2 bg-linear-to-b from-transparent" />
 
                 <div className="absolute bottom-0 z-3 flex w-full flex-col gap-1 p-2">
-                  <p className="truncate">{col.name}</p>
+                  <p className="truncate text-white">{col.name}</p>
                   <div className="flex-between">
-                    <AvatarGroup>
+                    <AvatarGroup className="not-dark:*:data-[slot=avatar]:ring-foreground!">
                       {allContributors?.map((contributor) => (
                         <Avatar
                           key={contributor.user.username}
@@ -222,7 +222,7 @@ function ProfilePage() {
                       ))}
                     </AvatarGroup>
 
-                    <div className="flex-center text-muted-foreground gap-1 text-xs sm:text-sm">
+                    <div className="flex-center dark:text-muted-foreground! text-border gap-1 text-xs sm:text-sm">
                       <HugeiconsIcon icon={File02Icon} size={16} />
                       <span>
                         {col._count.pages} page{col._count.pages !== 1 && "s"}
