@@ -163,6 +163,14 @@ function ProfilePage() {
 
         <p className="text-muted-foreground px-4 py-2">Collections</p>
         <section className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {collections.length === 0 && (
+            <div className="flex-center aspect-2/1 w-full rounded-xl border border-dashed not-md:text-sm">
+              <p className="text-center">
+                This user hasn&apos;t created any collections yet.
+              </p>
+            </div>
+          )}
+
           {collections.map((col) => {
             const { id: collectionId, contributors } = col
             const hasContributors = contributors.length > 0
