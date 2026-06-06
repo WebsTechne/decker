@@ -355,7 +355,7 @@ function CollectionIdComponent() {
               <HugeiconsIcon
                 icon={Bookmark02Icon}
                 strokeWidth={1.5}
-                fill={isSaved ? "var(--foreground)" : "transparent"}
+                fill={!isMine && isSaved ? "var(--foreground)" : "transparent"}
               />
               {savesCount}
             </button>
@@ -549,7 +549,9 @@ function CollectionIdComponent() {
               >
                 <HugeiconsIcon
                   icon={Bookmark02Icon}
-                  fill={isSaved ? "var(--foreground)" : "transparent"}
+                  fill={
+                    !isMine && isSaved ? "var(--foreground)" : "transparent"
+                  }
                   strokeWidth={1.5}
                 />
                 {savesCount}
