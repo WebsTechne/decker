@@ -58,34 +58,6 @@ const updateCollection = createServerFn({ method: "POST" })
     })
   })
 
-const createPages = createServerFn({ method: "POST" })
-  .inputValidator(
-    (data: {
-      collectionId: string
-      pages: {
-        imageUrl: string
-        position: number
-        width?: number
-        height?: number
-      }[]
-    }) => data,
-  )
-  .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session) throw new Error("Unauthorized")
-
-    await prisma.page.createMany({
-      data: data.pages.map((page) => ({
-        collectionId: data.collectionId,
-        imageUrl: page.imageUrl,
-        position: page.position,
-        width: page.width,
-        height: page.height,
-        uploadedById: session.user.id,
-      })),
-    })
-  })
-
 const deleteCollection = createServerFn({ method: "POST" })
   .inputValidator((data: { collectionId: string }) => data)
   .handler(async ({ data }) => {
@@ -415,7 +387,6 @@ const toggleSaveCollection = createServerFn({ method: "GET" })
 export type { CollectionData, CollectionListData }
 export {
   createCollection,
-  createPages,
   deleteCollection,
   getCollectionById,
   getCollectionList,

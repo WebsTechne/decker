@@ -38,11 +38,8 @@ import {
 import { ScrollArea } from "#/components/ui/scroll-area"
 import { Spinner } from "#/components/ui/spinner"
 import { uploadPages } from "#/lib/upload"
-import {
-  createCollection,
-  createPages,
-  deleteCollection,
-} from "#/server/collections"
+import { createCollection, deleteCollection } from "#/server/collections"
+import { createPages } from "#/server/pages"
 import { createTag, getTags } from "#/server/tags"
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"

@@ -11,12 +11,12 @@ import {
   SheetTitle,
 } from "../ui/sheet"
 import { Button } from "../ui/button"
-import { ScrollArea } from "../ui/scroll-area"
 import {
   FieldGroup,
   Field,
   FieldLabel,
   FieldError,
+  FieldDescription,
 } from "#/components/ui/field"
 import { Input } from "#/components/ui/input"
 import {
@@ -52,6 +52,8 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog"
 import { useStore } from "@tanstack/react-store"
+import { PageReorder } from "./reorder-page"
+import { reorderPages } from "#/server/pages"
 
 const formSchema = z.object({
   name: z.string().min(1, "Collection name is required"),
@@ -64,10 +66,16 @@ function EditCollectionSheet({
   collection,
   open,
   onOpenChange,
+  orderedPages,
+  onOrderChange,
+  onPageClick,
 }: {
   collection: CollectionData
   open: boolean
   onOpenChange: (open: boolean) => void
+  orderedPages: CollectionData["pages"]
+  onOrderChange: (pages: CollectionData["pages"]) => void
+  onPageClick: (index: number) => void
 }) {
   const maxChars = 200
   const [chars, setChars] = useState(collection.description?.length ?? 0)
@@ -90,6 +98,14 @@ function EditCollectionSheet({
     }),
     [collection],
   )
+
+  const originalOrder = useMemo(
+    () => collection.pages.map((p) => p.id),
+    [collection],
+  )
+
+  const isOrderChanged =
+    orderedPages.map((p) => p.id).join() !== originalOrder.join()
 
   const form = useForm({
     defaultValues: {
@@ -115,6 +131,16 @@ function EditCollectionSheet({
         await updateCollection({
           data: { collectionId, name, description, tagIds },
         })
+
+        if (isOrderChanged) {
+          await reorderPages({
+            data: {
+              collectionId: collection.id,
+              pages: orderedPages.map((p, i) => ({ id: p.id, position: i })),
+            },
+          })
+        }
+
         toast.dismiss("update-collection-toast")
         toast.success("Collection updated!")
         onOpenChange(false)
@@ -138,14 +164,15 @@ function EditCollectionSheet({
     })
   }, [collection])
 
-  const isDirty = useStore(form.store, (state) => {
-    const current = state.values
-    return (
-      current.name !== originalValues.name ||
-      current.description !== originalValues.description ||
-      [...current.tags].sort().join() !== originalValues.tags.join()
-    )
-  })
+  const isDirty =
+    useStore(form.store, (state) => {
+      const current = state.values
+      return (
+        current.name !== originalValues.name ||
+        current.description !== originalValues.description ||
+        [...current.tags].sort().join() !== originalValues.tags.join()
+      )
+    }) || isOrderChanged
 
   useEffect(() => {
     if (tags.length > 0 && collection.tags.length > 0) {
@@ -197,7 +224,7 @@ function EditCollectionSheet({
         <SheetContent
           side="left"
           showCloseButton={false}
-          className="w-full! not-md:max-w-md!"
+          className="w-full! gap-0! not-md:max-w-md!"
         >
           <SheetHeader>
             <SheetTitle className="text-lg">Edit Collection</SheetTitle>
@@ -206,7 +233,7 @@ function EditCollectionSheet({
             </SheetDescription>
           </SheetHeader>
 
-          <ScrollArea className="flex-1">
+          <div className="no-scrollbar flex-1 overflow-y-auto">
             <div className="px-4">
               <form
                 onSubmit={(e) => {
@@ -377,10 +404,20 @@ function EditCollectionSheet({
                       )
                     }}
                   />
+
+                  <Field className="gap-1">
+                    <FieldLabel>Page Order</FieldLabel>
+                    <FieldDescription>Drag to reorder pages</FieldDescription>
+                    <PageReorder
+                      pages={orderedPages}
+                      onChange={onOrderChange}
+                      onPageClick={onPageClick}
+                    />
+                  </Field>
                 </FieldGroup>
               </form>
             </div>
-          </ScrollArea>
+          </div>
 
           <SheetFooter>
             <SheetClose
@@ -392,7 +429,13 @@ function EditCollectionSheet({
               disabled={!isDirty || form.state.isSubmitting}
               onClick={() => form.handleSubmit()}
             >
-              Save
+              {form.state.isSubmitting ? (
+                <>
+                  <Spinner /> Updating...
+                </>
+              ) : (
+                "Update"
+              )}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -409,6 +452,12 @@ function EditCollectionSheet({
               variant="destructive"
               onClick={() => {
                 setConfirmCancelOpen(false)
+                onOrderChange(collection.pages) // reset pages order
+                form.reset() // reset form values
+                setSelectedTags(
+                  tags.filter((t) => currentTagIds.includes(t.id)),
+                ) // reset tags combobox
+                setChars(collection.description?.length ?? 0) // reset char count
                 onOpenChange(false)
               }}
             >

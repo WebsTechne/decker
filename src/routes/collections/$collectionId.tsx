@@ -18,7 +18,6 @@ import { authClient } from "#/lib/auth-client"
 import { uploadPages } from "#/lib/upload"
 import { cn } from "#/lib/utils"
 import {
-  createPages,
   getCollectionById,
   toggleSaveCollection,
   type CollectionData,
@@ -46,6 +45,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { CommentsSheet } from "#/components/sections/comment-section"
 import { EditCollectionSheet } from "#/components/sections/edit-collection-section"
+import { createPages } from "#/server/pages"
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionIdComponent,
@@ -129,14 +129,19 @@ function CollectionIdComponent() {
 
   const [isSaved, setSaved] = useState(false)
 
+  const [orderedPages, setOrderedPages] = useState<CollectionData["pages"]>([])
+
+  // reset when collection data changes (after save/refetch)
   useEffect(() => {
-    if (collection) {
-      setSaved(collection.saves.length > 0)
-    }
+    if (collection) setOrderedPages(collection.pages)
+  }, [collection?.pages])
+
+  useEffect(() => {
+    if (collection) setSaved(collection.saves.length > 0)
   }, [collection])
 
   useEffect(() => {
-    if (lightboxIndex === null || !collection?.pages) return
+    if (lightboxIndex === null || !orderedPages.length) return
 
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       switch (event.key) {
@@ -147,14 +152,14 @@ function CollectionIdComponent() {
         case "ArrowLeft":
           setLightboxIndex((prev) =>
             prev !== null
-              ? (prev - 1 + collection.pages.length) % collection.pages.length
+              ? (prev - 1 + orderedPages.length) % orderedPages.length
               : null,
           )
           break
 
         case "ArrowRight":
           setLightboxIndex((prev) =>
-            prev !== null ? (prev + 1) % collection.pages.length : null,
+            prev !== null ? (prev + 1) % orderedPages.length : null,
           )
           break
       }
@@ -165,7 +170,7 @@ function CollectionIdComponent() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [lightboxIndex, collection?.pages])
+  }, [lightboxIndex, orderedPages])
 
   if (authPending || isPending)
     return (
@@ -222,10 +227,6 @@ function CollectionIdComponent() {
         </div>
       </div>
     )
-
-  const actionNotAvailable = () => {
-    toast("This action is not available")
-  }
 
   const handleToggleSave = async () => {
     if (isMine) return
@@ -479,7 +480,7 @@ function CollectionIdComponent() {
 
           <main className="relative flex-1 md:px-4">
             <div className="columns-1 gap-1 sm:columns-2 md:gap-2 lg:columns-3 2xl:columns-4">
-              {pages.map((page, i) => (
+              {orderedPages.map((page, i) => (
                 <div
                   key={page.id}
                   className="bg-muted dark:bg-card relative mb-1 cursor-pointer break-inside-avoid md:mb-2"
@@ -604,7 +605,7 @@ function CollectionIdComponent() {
           onClick={() => setLightboxIndex(null)}
         >
           <img
-            src={pages[lightboxIndex].imageUrl}
+            src={orderedPages[lightboxIndex].imageUrl}
             alt={`page ${lightboxIndex + 1}`}
             className="max-h-[90dvh] max-w-[calc(100dvw-16px)] rounded-lg object-contain"
             draggable={false}
@@ -634,7 +635,7 @@ function CollectionIdComponent() {
             variant="secondary"
             size="icon"
             className="absolute right-1 bottom-1 disabled:pointer-events-auto! md:top-1/2 md:right-4 md:-translate-y-1/2"
-            disabled={!(lightboxIndex < pages.length - 1)}
+            disabled={!(lightboxIndex < orderedPages.length - 1)}
             onClick={(e) => {
               e.stopPropagation()
               setLightboxIndex(lightboxIndex + 1)
@@ -647,7 +648,7 @@ function CollectionIdComponent() {
             />
           </Button>
           <span className="flex-center absolute bottom-0 h-10 text-sm text-white">
-            {lightboxIndex + 1} / {pages.length}
+            {lightboxIndex + 1} / {orderedPages.length}
           </span>
         </div>
       )}
@@ -662,6 +663,9 @@ function CollectionIdComponent() {
         collection={collection}
         open={editSectionOpen}
         onOpenChange={setEditSectionOpen}
+        orderedPages={orderedPages}
+        onOrderChange={setOrderedPages}
+        onPageClick={(index) => setLightboxIndex(index)}
       />
     </>
   )
