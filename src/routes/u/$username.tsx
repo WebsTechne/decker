@@ -77,38 +77,37 @@ function ProfilePage() {
   const { image, collections, displayUsername, department, school } = profile
 
   return (
-    <div className="relative">
-      <header className="flex-between pointer-events-none absolute top-0 z-1000 h-12 w-full px-1">
-        <Button
-          variant="ghost"
-          size="icon-lg"
-          className="pointer-events-auto rounded-full"
-          onClick={() => router.history.back()}
-        >
-          <HugeiconsIcon
-            icon={ArrowLeft02Icon}
-            strokeWidth={2}
-            className="size-6!"
-          />
-        </Button>
-
-        {isMine && (
+    <div className="relative grid grid-cols-1 md:grid-cols-2">
+      <section className="md:bg-card contents md:relative md:block md:h-dvh">
+        <header className="flex-between pointer-events-none absolute top-0 z-1000 h-12 w-full px-1">
           <Button
             variant="ghost"
             size="icon-lg"
             className="pointer-events-auto rounded-full"
-            onClick={() => {}}
+            onClick={() => router.history.back()}
           >
             <HugeiconsIcon
-              icon={Edit02Icon}
+              icon={ArrowLeft02Icon}
               strokeWidth={2}
-              className="size-5!"
+              className="size-6!"
             />
           </Button>
-        )}
-      </header>
 
-      <main className="pb-4">
+          {isMine && (
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              className="pointer-events-auto rounded-full"
+              onClick={() => {}}
+            >
+              <HugeiconsIcon
+                icon={Edit02Icon}
+                strokeWidth={2}
+                className="size-5!"
+              />
+            </Button>
+          )}
+        </header>
         <div className="bg-card flex-center relative h-50">
           <span className="bg-primary absolute inset-0 rounded-b-2xl" />
           <div className="bg-background absolute top-37.5 left-5 size-25 rounded-full p-1">
@@ -122,7 +121,6 @@ function ProfilePage() {
             </Avatar>
           </div>
         </div>
-
         <div className="bg-card mb-4 flex flex-col gap-2 p-4 pt-14.5">
           <span className="font-heading text-lg font-semibold">
             {displayUsername}
@@ -160,9 +158,11 @@ function ProfilePage() {
             </div>
           </div>
         </div>
+      </section>
 
+      <main className="pb-4">
         <p className="text-muted-foreground px-4 py-2">Collections</p>
-        <section className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <section className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2">
           {collections.length === 0 && (
             <div className="flex-center aspect-2/1 w-full rounded-xl border border-dashed not-md:text-sm">
               <p className="text-center">
