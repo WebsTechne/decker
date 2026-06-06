@@ -5,7 +5,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "#/components/ui/tooltip"
-import { getSession } from "#/lib/auth-session"
 import { cn } from "#/lib/utils"
 import {
   createFileRoute,

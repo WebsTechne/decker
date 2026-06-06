@@ -1,4 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import {
+  createFileRoute,
+  Link,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router"
 import { useForm } from "@tanstack/react-form"
 import { useState } from "react"
 import {
@@ -30,6 +35,9 @@ import { authClient } from "#/lib/auth-client"
 
 export const Route = createFileRoute("/auth/sign-in/")({
   component: SignIn,
+  validateSearch: z.object({
+    redirect: z.string().optional(),
+  }),
 })
 
 const formSchema = z.object({
@@ -40,6 +48,7 @@ const formSchema = z.object({
 function SignIn() {
   const navigate = useNavigate()
   const search = Route.useSearch()
+  const routerState = useRouterState()
 
   const [error, setError] = useState("")
   const [view, setView] = useState(false)
@@ -90,7 +99,7 @@ function SignIn() {
 
         toast.dismiss("sign-in-toast")
         toast.success("Sign in successful")
-        navigate({ to: (search as any).redirect ?? "/" })
+        navigate({ to: search.redirect ?? "/" })
       } catch (err) {
         console.error(err)
         toast.dismiss("sign-in-toast")
@@ -216,6 +225,7 @@ function SignIn() {
           Don&apos;t have an account?{" "}
           <Link
             to="/auth/sign-up"
+            search={{ redirect: routerState.location.href }}
             className="text-foreground underline underline-offset-4"
           >
             Sign up

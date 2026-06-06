@@ -21,6 +21,7 @@ import {
   useParams,
   useRouter,
   Link,
+  useRouterState,
 } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/u/$username")({
@@ -29,15 +30,18 @@ export const Route = createFileRoute("/u/$username")({
 
 function ProfilePage() {
   const router = useRouter()
+  const routerState = useRouterState()
+
   const { data: session, isPending: authPending } = authClient.useSession()
-  const { username } = useParams({ from: "/u/$username" })
+  let { username } = useParams({ from: "/u/$username" })
+  username = username.toLowerCase()
   const { data: profile, isPending } = useQuery({
     queryKey: ["profile", username],
     enabled: !!session && !authPending,
     queryFn: () => getProfileByUsername({ data: { username } }),
   })
 
-  if (authPending || isPending)
+  if (authPending || (!!session && isPending))
     return (
       <div className="flex-center h-dvh">
         <Spinner className="size-7" />
@@ -56,6 +60,7 @@ function ProfilePage() {
             continue. Sign in at the{" "}
             <Link
               to="/auth/sign-in"
+              search={{ redirect: routerState.location.href }}
               className="text-foreground! whitespace-nowrap underline underline-offset-4"
             >
               Sign in
@@ -164,7 +169,7 @@ function ProfilePage() {
         <p className="text-muted-foreground px-4 py-2">Collections</p>
         <section className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2">
           {collections.length === 0 && (
-            <div className="flex-center aspect-2/1 w-full rounded-xl border border-dashed not-md:text-sm">
+            <div className="flex-center aspect-2/1 w-full rounded-xl border border-dashed px-2 not-md:text-sm">
               <p className="text-center">
                 This user hasn&apos;t created any collections yet.
               </p>

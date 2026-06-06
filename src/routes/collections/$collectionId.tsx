@@ -40,6 +40,7 @@ import {
   useParams,
   Link,
   useRouter,
+  useRouterState,
 } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -110,6 +111,8 @@ const CollectionInfo = ({
 function CollectionIdComponent() {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const routerState = useRouterState()
+
   const { data: session, isPending: authPending } = authClient.useSession()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
@@ -172,7 +175,7 @@ function CollectionIdComponent() {
     }
   }, [lightboxIndex, orderedPages])
 
-  if (authPending || isPending)
+  if (authPending || (!!session && isPending))
     return (
       <div className="flex-center h-dvh">
         <Spinner className="size-7" />
@@ -191,6 +194,7 @@ function CollectionIdComponent() {
             continue. Sign in at the{" "}
             <Link
               to="/auth/sign-in"
+              search={{ redirect: routerState.location.href }}
               className="text-foreground! whitespace-nowrap underline underline-offset-4"
             >
               Sign in

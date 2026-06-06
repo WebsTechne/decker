@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
-import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as CollectionsIndexRouteImport } from './routes/collections/index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as UUsernameRouteImport } from './routes/u/$username'
@@ -31,11 +30,6 @@ const AuthRouteRoute = AuthRouteRouteImport.update({
 } as any)
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileIndexRoute = ProfileIndexRouteImport.update({
-  id: '/profile/',
-  path: '/profile/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CollectionsIndexRoute = CollectionsIndexRouteImport.update({
@@ -101,7 +95,6 @@ export interface FileRoutesByFullPath {
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/u/$username': typeof UUsernameRoute
   '/collections/': typeof CollectionsIndexRoute
-  '/profile/': typeof ProfileIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/activity/': typeof AppActivityIndexRoute
   '/explore/': typeof AppExploreIndexRoute
@@ -116,7 +109,6 @@ export interface FileRoutesByTo {
   '/u/$username': typeof UUsernameRoute
   '/': typeof AppIndexRoute
   '/collections': typeof CollectionsIndexRoute
-  '/profile': typeof ProfileIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/activity': typeof AppActivityIndexRoute
   '/explore': typeof AppExploreIndexRoute
@@ -133,7 +125,6 @@ export interface FileRoutesById {
   '/u/$username': typeof UUsernameRoute
   '/_app/': typeof AppIndexRoute
   '/collections/': typeof CollectionsIndexRoute
-  '/profile/': typeof ProfileIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_app/activity/': typeof AppActivityIndexRoute
   '/_app/explore/': typeof AppExploreIndexRoute
@@ -150,7 +141,6 @@ export interface FileRouteTypes {
     | '/collections/$collectionId'
     | '/u/$username'
     | '/collections/'
-    | '/profile/'
     | '/api/auth/$'
     | '/activity/'
     | '/explore/'
@@ -165,7 +155,6 @@ export interface FileRouteTypes {
     | '/u/$username'
     | '/'
     | '/collections'
-    | '/profile'
     | '/api/auth/$'
     | '/activity'
     | '/explore'
@@ -181,7 +170,6 @@ export interface FileRouteTypes {
     | '/u/$username'
     | '/_app/'
     | '/collections/'
-    | '/profile/'
     | '/api/auth/$'
     | '/_app/activity/'
     | '/_app/explore/'
@@ -196,7 +184,6 @@ export interface RootRouteChildren {
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   UUsernameRoute: typeof UUsernameRoute
   CollectionsIndexRoute: typeof CollectionsIndexRoute
-  ProfileIndexRoute: typeof ProfileIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -214,13 +201,6 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile/': {
-      id: '/profile/'
-      path: '/profile'
-      fullPath: '/profile/'
-      preLoaderRoute: typeof ProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/collections/': {
@@ -343,7 +323,6 @@ const rootRouteChildren: RootRouteChildren = {
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   UUsernameRoute: UUsernameRoute,
   CollectionsIndexRoute: CollectionsIndexRoute,
-  ProfileIndexRoute: ProfileIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,6 +1,6 @@
 import type { JSX } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { Link, useNavigate } from "@tanstack/react-router"
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router"
 import type { ServerSession } from "#/lib/types"
 import { useHeaderStore } from "#/lib/header-store"
 import { Button } from "../ui/button"
@@ -25,6 +25,7 @@ function AvatarBtn({
   authPending: boolean
 }) {
   const navigate = useNavigate()
+  const routerState = useRouterState()
 
   if (authPending) return <Skeleton className="size-8 rounded-full"></Skeleton>
 
@@ -33,7 +34,12 @@ function AvatarBtn({
       <Button
         size="sm"
         nativeButton={false}
-        render={<Link to="/auth/sign-in" />}
+        render={
+          <Link
+            to="/auth/sign-in"
+            search={{ redirect: routerState.location.href }}
+          />
+        }
       >
         Sign in
       </Button>
@@ -46,7 +52,10 @@ function AvatarBtn({
         toast.error("Failed to sign out")
         // throw new Error(res.error.message)
       }
-      navigate({ to: "/auth/sign-in" })
+      navigate({
+        to: "/auth/sign-in",
+        search: { redirect: routerState.location.href },
+      })
     } catch (err) {
       toast.error("Failed to sign out")
     }
@@ -65,7 +74,13 @@ function AvatarBtn({
       </DropdownMenuTrigger>
       <DropdownMenuContent sideOffset={10} className="min-w-37.5">
         <DropdownMenuItem
-          render={<Link to="/profile" className="cursor-pointer" />}
+          render={
+            <Link
+              to="/u/$username"
+              params={{ username: username ?? "" }}
+              className="cursor-pointer"
+            />
+          }
         >
           <HugeiconsIcon icon={UserCircleIcon} strokeWidth={2} />
           Profile

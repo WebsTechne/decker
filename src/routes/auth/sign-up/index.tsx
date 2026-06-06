@@ -1,4 +1,9 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
+import {
+  createFileRoute,
+  useNavigate,
+  Link,
+  useRouterState,
+} from "@tanstack/react-router"
 import { useForm, type ReactFormExtendedApi } from "@tanstack/react-form"
 import { useState } from "react"
 import { AccountStep } from "#/components/form/account-step"
@@ -26,6 +31,9 @@ import { updateUserProfile, deleteUser } from "#/server/users"
 
 export const Route = createFileRoute("/auth/sign-up/")({
   component: SignUp,
+  validateSearch: z.object({
+    redirect: z.string().optional(),
+  }),
 })
 
 export type SignUpValues = {
@@ -66,6 +74,8 @@ const formSchema = z.object({
 function SignUp() {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const navigate = useNavigate()
+  const search = Route.useSearch()
+  const routerState = useRouterState()
 
   const form = useForm({
     defaultValues: {
@@ -128,7 +138,7 @@ function SignUp() {
         // 4 redirect
         toast.dismiss("sign-up-toast")
         toast.success("Sign up successful")
-        navigate({ to: "/" })
+        navigate({ to: search.redirect ?? "/" })
       } catch (err) {
         console.error(err)
         // 5 cleanup — delete the created user
@@ -239,6 +249,7 @@ function SignUp() {
           Already have an account?{" "}
           <Link
             to="/auth/sign-in"
+            search={{ redirect: routerState.location.href }}
             className="text-foreground underline underline-offset-4"
           >
             Sign in
