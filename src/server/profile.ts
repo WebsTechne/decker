@@ -18,10 +18,33 @@ const getProfileByUsername = createServerFn({ method: "GET" })
               bannerUrl: true,
               id: true,
               name: true,
+              author: {
+                select: { image: true, username: true },
+              },
               contributors: {
                 select: { user: { select: { image: true, username: true } } },
               },
               _count: { select: { pages: true, saves: true } },
+            },
+          },
+          contributing: {
+            select: {
+              collection: {
+                select: {
+                  bannerUrl: true,
+                  id: true,
+                  name: true,
+                  author: {
+                    select: { image: true, username: true },
+                  },
+                  contributors: {
+                    select: {
+                      user: { select: { image: true, username: true } },
+                    },
+                  },
+                  _count: { select: { pages: true, saves: true } },
+                },
+              },
             },
           },
           _count: {

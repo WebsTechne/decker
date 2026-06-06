@@ -37,5 +37,4 @@ const getTags = createServerFn({ method: "GET" }).handler(async () => {
   }
 })
 
-export type TagData = Prisma.TagGetPayload<{}>
 export { createTag, getTags }

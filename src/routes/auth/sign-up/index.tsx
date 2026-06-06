@@ -1,9 +1,4 @@
-import {
-  createFileRoute,
-  useNavigate,
-  Link,
-  useRouterState,
-} from "@tanstack/react-router"
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
 import { useForm, type ReactFormExtendedApi } from "@tanstack/react-form"
 import { useState } from "react"
 import { AccountStep } from "#/components/form/account-step"
@@ -75,7 +70,6 @@ function SignUp() {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const navigate = useNavigate()
   const search = Route.useSearch()
-  const routerState = useRouterState()
 
   const form = useForm({
     defaultValues: {
@@ -249,7 +243,7 @@ function SignUp() {
           Already have an account?{" "}
           <Link
             to="/auth/sign-in"
-            search={{ redirect: routerState.location.href }}
+            search={{ redirect: search.redirect ?? "/" }}
             className="text-foreground underline underline-offset-4"
           >
             Sign in

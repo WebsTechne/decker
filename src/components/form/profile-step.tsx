@@ -3,9 +3,9 @@ import { Button } from "../ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
 import type { SignUpForm } from "#/routes/auth/sign-up"
-import { useQuery } from "@tanstack/react-query"
-import { getDepartments } from "#/server/departments"
-import { getSchools } from "#/server/schools"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { createDepartment, getDepartments } from "#/server/departments"
+import { createSchool, getSchools } from "#/server/schools"
 import z from "zod"
 import {
   Combobox,
@@ -16,6 +16,8 @@ import {
   ComboboxList,
 } from "../ui/combobox"
 import { Spinner } from "../ui/spinner"
+import { useRef } from "react"
+import { toast } from "sonner"
 
 export function ProfileStep({
   form,
@@ -26,6 +28,8 @@ export function ProfileStep({
   onNext: () => void
   onBack: () => void
 }) {
+  const queryClient = useQueryClient()
+
   const { data: schools = [], isLoading: isLoadingSchools } = useQuery({
     queryKey: ["schools"],
     queryFn: getSchools,
@@ -50,6 +54,40 @@ export function ProfileStep({
     if (isValid) onNext()
   }
 
+  const schoolInputRef = useRef<HTMLInputElement | null>(null)
+  const departmentInputRef = useRef<HTMLInputElement | null>(null)
+
+  const handleCreateSchool = async () => {
+    toast.loading("Adding school...", { id: "create-school-toast" })
+    try {
+      await createSchool({
+        data: { school: schoolInputRef.current?.value ?? "" },
+      })
+      queryClient.invalidateQueries({ queryKey: ["schools"] })
+      toast.dismiss("create-school-toast")
+      toast.success("School added")
+    } catch (err) {
+      toast.dismiss("create-school-toast")
+      toast.error("Failed to add school.")
+      console.error("❌ createSchool error:", err)
+    }
+  }
+  const handleCreateDepartment = async () => {
+    toast.loading("Adding department...", { id: "create-department-toast" })
+    try {
+      await createDepartment({
+        data: { department: departmentInputRef.current?.value ?? "" },
+      })
+      queryClient.invalidateQueries({ queryKey: ["departments"] })
+      toast.dismiss("create-department-toast")
+      toast.success("Department added")
+    } catch (err) {
+      toast.dismiss("create-department-toast")
+      toast.error("Failed to add department.")
+      console.error("❌ createDepartment error:", err)
+    }
+  }
+
   return (
     <>
       <form.Field
@@ -71,6 +109,7 @@ export function ProfileStep({
                 autoHighlight
               >
                 <ComboboxInput
+                  ref={schoolInputRef}
                   placeholder="Enter you school's full name"
                   showClear={true}
                   onKeyDown={(e) => {
@@ -82,7 +121,7 @@ export function ProfileStep({
                 />
                 <ComboboxContent>
                   <ComboboxEmpty>
-                    <Button variant="secondary" onClick={() => {}}>
+                    <Button variant="secondary" onClick={handleCreateSchool}>
                       Add school
                     </Button>
                   </ComboboxEmpty>
@@ -128,6 +167,7 @@ export function ProfileStep({
                 autoHighlight
               >
                 <ComboboxInput
+                  ref={departmentInputRef}
                   placeholder="Enter you department"
                   showClear={true}
                   onKeyDown={(e) => {
@@ -139,7 +179,10 @@ export function ProfileStep({
                 />
                 <ComboboxContent>
                   <ComboboxEmpty>
-                    <Button variant="secondary" onClick={() => {}}>
+                    <Button
+                      variant="secondary"
+                      onClick={handleCreateDepartment}
+                    >
                       Add department
                     </Button>
                   </ComboboxEmpty>

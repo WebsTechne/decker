@@ -1,9 +1,4 @@
-import {
-  createFileRoute,
-  Link,
-  useNavigate,
-  useRouterState,
-} from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useForm } from "@tanstack/react-form"
 import { useState } from "react"
 import {
@@ -48,7 +43,6 @@ const formSchema = z.object({
 function SignIn() {
   const navigate = useNavigate()
   const search = Route.useSearch()
-  const routerState = useRouterState()
 
   const [error, setError] = useState("")
   const [view, setView] = useState(false)
@@ -225,7 +219,7 @@ function SignIn() {
           Don&apos;t have an account?{" "}
           <Link
             to="/auth/sign-up"
-            search={{ redirect: routerState.location.href }}
+            search={{ redirect: search.redirect ?? "/" }}
             className="text-foreground underline underline-offset-4"
           >
             Sign up

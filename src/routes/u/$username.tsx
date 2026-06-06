@@ -71,7 +71,33 @@ function ProfilePage() {
       </div>
     )
 
-  if (!profile) return null
+  if (!profile)
+    return (
+      <div className="flex-center h-dvh px-5">
+        <div>
+          <h1 className="font-heading mb-2 text-4xl font-bold">Oops...</h1>
+          <p className="text-muted-foreground max-w-prose text-base md:text-lg">
+            This account has been deleted or does not exist.
+            <br />
+            Go{" "}
+            <button
+              className="text-foreground! whitespace-nowrap underline underline-offset-4"
+              onClick={() => router.history.back()}
+            >
+              Back
+            </button>{" "}
+            or go to the{" "}
+            <Link
+              to="/"
+              className="text-foreground! whitespace-nowrap underline underline-offset-4"
+            >
+              Home
+            </Link>{" "}
+            page
+          </p>
+        </div>
+      </div>
+    )
 
   const totalSavesReceived = profile.collections.reduce(
     (sum, col) => sum + col._count.saves,
@@ -79,10 +105,22 @@ function ProfilePage() {
   )
   const isMine = session.user.username === username
 
-  const { image, collections, displayUsername, department, school } = profile
+  const {
+    image,
+    collections,
+    contributing,
+    displayUsername,
+    department,
+    school,
+  } = profile
+
+  const allCollections = [
+    ...collections,
+    ...contributing.map((c) => c.collection),
+  ]
 
   return (
-    <div className="relative grid grid-cols-1 md:grid-cols-2">
+    <div className="relative grid grid-cols-1 md:grid-cols-[2fr_3fr]">
       <section className="md:bg-card contents md:relative md:block md:h-dvh">
         <header className="flex-between pointer-events-none absolute top-0 z-1000 h-12 w-full px-1">
           <Button
@@ -168,7 +206,7 @@ function ProfilePage() {
       <main className="pb-4">
         <p className="text-muted-foreground px-4 py-2">Collections</p>
         <section className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2">
-          {collections.length === 0 && (
+          {allCollections.length === 0 && (
             <div className="flex-center aspect-2/1 w-full rounded-xl border border-dashed px-2 not-md:text-sm">
               <p className="text-center">
                 This user hasn&apos;t created any collections yet.
@@ -176,12 +214,9 @@ function ProfilePage() {
             </div>
           )}
 
-          {collections.map((col) => {
+          {allCollections.map((col) => {
             const { id: collectionId, contributors } = col
-            const hasContributors = contributors.length > 0
-            const allContributors = hasContributors
-              ? [{ user: { image, username } }, ...contributors]
-              : null
+            const allContributors = [{ user: col.author }, ...contributors]
 
             return (
               <Link
@@ -209,7 +244,7 @@ function ProfilePage() {
                   <p className="truncate text-white">{col.name}</p>
                   <div className="flex-between">
                     <AvatarGroup className="not-dark:*:data-[slot=avatar]:ring-foreground!">
-                      {allContributors?.map((contributor) => (
+                      {allContributors.map((contributor) => (
                         <Avatar
                           key={contributor.user.username}
                           className="size-6.5"

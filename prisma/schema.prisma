@@ -17,6 +17,7 @@ datasource db {
 model School {
   id        String   @id @default(cuid())
   name      String   @unique
+  verified  Boolean  @default(false)
   createdAt DateTime @default(now())
 
   users User[]
@@ -25,6 +26,7 @@ model School {
 model Department {
   id        String   @id @default(cuid())
   name      String   @unique
+  verified  Boolean  @default(false)
   createdAt DateTime @default(now())
 
   users User[]

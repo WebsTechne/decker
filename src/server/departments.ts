@@ -1,19 +1,36 @@
 import { createServerFn } from "@tanstack/react-start"
 import { prisma } from "#/db"
-import type { Prisma } from "#/generated/prisma/client"
 
-export const getDepartments = createServerFn({ method: "GET" }).handler(
-  async () => {
+const createDepartment = createServerFn({ method: "POST" })
+  .inputValidator((data: { department: string }) => data)
+  .handler(async ({ data }) => {
     try {
-      const data = await prisma.department.findMany({
-        orderBy: { name: "asc" },
+      const department = await prisma.department.upsert({
+        where: {
+          name: data.department,
+        },
+        update: {},
+        create: {
+          name: data.department,
+        },
       })
-      return data
+      return department
     } catch (err) {
-      console.error("❌ getDepartments error:", err)
+      console.error("❌ createDepartment error:", err)
       throw err
     }
-  },
-)
+  })
 
-export type DepartmentData = Prisma.DepartmentGetPayload<{}>
+const getDepartments = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const data = await prisma.department.findMany({
+      orderBy: { name: "asc" },
+    })
+    return data
+  } catch (err) {
+    console.error("❌ getDepartments error:", err)
+    throw err
+  }
+})
+
+export { createDepartment, getDepartments }
