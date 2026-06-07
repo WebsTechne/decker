@@ -38,6 +38,7 @@ export const auth = betterAuth({
     "exp://10.198.*.*:*/**", // Trust 10.198.x.x IP range with any port and path,
     "http://10.198.*.*:*/**",
     "http://10.94.8.24:3000", // my phone's ipconfig
+    "http://10.116.68.24:3000",
   ],
 
   plugins: [username(), tanstackStartCookies()],

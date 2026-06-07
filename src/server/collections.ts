@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { prisma } from "#/db"
 import { getSession } from "#/lib/auth-session"
 import type { Prisma } from "#/generated/prisma/client"
+import { createActivity } from "#/lib/activity"
 
 const createCollection = createServerFn({ method: "POST" })
   .inputValidator(
@@ -25,6 +26,16 @@ const createCollection = createServerFn({ method: "POST" })
     })
   })
 
+const getSavesSimple = createServerFn({ method: "GET" })
+  .inputValidator((data: { collectionId: string }) => data)
+  .handler(async ({ data }) => {
+    const saves = await prisma.save.findMany({
+      where: { collectionId: data.collectionId },
+      select: { userId: true },
+    })
+    return saves
+  })
+
 const updateCollection = createServerFn({ method: "POST" })
   .inputValidator(
     (data: {
@@ -38,7 +49,15 @@ const updateCollection = createServerFn({ method: "POST" })
     const session = await getSession()
     if (!session) throw new Error("Unauthorized")
 
-    return prisma.collection.update({
+    const saves = await getSavesSimple({
+      data: { collectionId: data.collectionId },
+    })
+
+    const recipientIds = saves
+      .map((s) => s.userId)
+      .filter((id) => id !== session.user.id)
+
+    const result = await prisma.collection.update({
       where: { id: data.collectionId, authorId: session.user.id },
       data: {
         name: data.name,
@@ -56,6 +75,18 @@ const updateCollection = createServerFn({ method: "POST" })
         },
       },
     })
+
+    if (recipientIds.length > 0)
+      await createActivity({
+        data: {
+          type: "COLLECTION_UPDATED",
+          recipientIds,
+          actorId: session.user.id,
+          collectionId: data.collectionId,
+        },
+      })
+
+    return result
   })
 
 const deleteCollection = createServerFn({ method: "POST" })
@@ -157,6 +188,17 @@ type CollectionData = Prisma.CollectionGetPayload<{
     _count: { select: { saves: true; comments: true; pages: true } }
   }
 }>
+
+const getCollectionSimple = createServerFn({ method: "GET" })
+  .inputValidator((data: { collectionId: string }) => data)
+  .handler(async ({ data }) => {
+    const collection = await prisma.collection.findUnique({
+      where: { id: data.collectionId },
+      select: { authorId: true, contributors: { select: { userId: true } } },
+    })
+    if (!collection) throw new Error("Collection not found")
+    return collection
+  })
 
 // Fetch Collection List
 const getCollectionList = createServerFn({ method: "GET" }).handler(
@@ -349,7 +391,7 @@ type CollectionListData = Prisma.CollectionGetPayload<{
   }
 }>
 
-const toggleSaveCollection = createServerFn({ method: "GET" })
+const toggleSaveCollection = createServerFn({ method: "POST" })
   .inputValidator((data: { collectionId: string }) => data)
   .handler(async ({ data }) => {
     const session = await getSession()
@@ -364,7 +406,11 @@ const toggleSaveCollection = createServerFn({ method: "GET" })
       },
     })
 
-    if (existingSave)
+    const collection = await getCollectionSimple({
+      data: { collectionId: data.collectionId },
+    })
+
+    if (existingSave) {
       await prisma.save.delete({
         where: {
           userId_collectionId: {
@@ -373,7 +419,8 @@ const toggleSaveCollection = createServerFn({ method: "GET" })
           },
         },
       })
-    else
+      return { saved: false }
+    } else {
       await prisma.save.create({
         data: {
           userId: session.user.id,
@@ -381,6 +428,20 @@ const toggleSaveCollection = createServerFn({ method: "GET" })
         },
       })
 
+      const recipientIds = [
+        collection.authorId,
+        ...collection.contributors.map((c) => c.userId),
+      ].filter((id) => id !== session.user.id)
+
+      await createActivity({
+        data: {
+          type: "SAVE",
+          recipientIds,
+          actorId: session.user.id,
+          collectionId: data.collectionId,
+        },
+      })
+    }
     return { saved: true }
   })
 
@@ -389,6 +450,8 @@ export {
   createCollection,
   deleteCollection,
   getCollectionById,
+  getCollectionSimple,
+  getSavesSimple,
   getCollectionList,
   getMyCollections,
   getSavedCollections,

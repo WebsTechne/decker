@@ -19,6 +19,7 @@ import { uploadPages } from "#/lib/upload"
 import { cn } from "#/lib/utils"
 import {
   getCollectionById,
+  getSavesSimple,
   toggleSaveCollection,
   type CollectionData,
 } from "#/server/collections"
@@ -47,6 +48,7 @@ import { toast } from "sonner"
 import { CommentsSheet } from "#/components/sections/comment-section"
 import { EditCollectionSheet } from "#/components/sections/edit-collection-section"
 import { createPages } from "#/server/pages"
+import { createActivity } from "#/lib/activity"
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionIdComponent,
@@ -287,6 +289,14 @@ function CollectionIdComponent() {
         },
       )
 
+      const saves = await getSavesSimple({
+        data: { collectionId: collection.id },
+      })
+
+      const recipientIds = saves
+        .map((s) => s.userId)
+        .filter((id) => id !== session.user.id)
+
       await createPages({
         data: {
           collectionId,
@@ -298,6 +308,17 @@ function CollectionIdComponent() {
           })),
         },
       })
+
+      if (recipientIds.length > 0)
+        await createActivity({
+          data: {
+            type: "PAGE_ADDED",
+            recipientIds,
+            actorId: session.user.id,
+            collectionId: collection.id,
+            pageCount: uploadFiles.length,
+          },
+        })
 
       toast.dismiss("add-pages-toast")
       toast.success("Pages added!")

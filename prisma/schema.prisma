@@ -219,6 +219,7 @@ enum ActivityType {
   COMMENT
   PAGE_ADDED
   PAGE_DELETED
+  COLLECTION_UPDATED
 }
 
 model Activity {

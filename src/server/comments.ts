@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start"
 import { prisma } from "#/db"
 import { getSession } from "#/lib/auth-session"
+import { getCollectionSimple } from "./collections"
+import { createActivity } from "#/lib/activity"
 
 const getComments = createServerFn({ method: "GET" })
   .inputValidator((data: { collectionId: string }) => data)
@@ -31,20 +33,20 @@ const createComment = createServerFn({ method: "POST" })
     if (!session) throw new Error("Unauthorized")
 
     // check if commenter is author or contributor
-    const collection = await prisma.collection.findUnique({
-      where: { id: data.collectionId },
-      include: {
-        contributors: { select: { userId: true } },
-      },
+    const collection = await getCollectionSimple({
+      data: { collectionId: data.collectionId },
     })
-
-    if (!collection) throw new Error("Collection not found")
 
     const isAuthorOrContributor =
       collection.authorId === session.user.id ||
       collection.contributors.some((c) => c.userId === session.user.id)
 
-    return prisma.comment.create({
+    const recipientIds = [
+      collection.authorId,
+      ...collection.contributors.map((c) => c.userId),
+    ].filter((id) => id !== session.user.id)
+
+    const comment = await prisma.comment.create({
       data: {
         body: data.body,
         collectionId: data.collectionId,
@@ -62,6 +64,20 @@ const createComment = createServerFn({ method: "POST" })
         },
       },
     })
+
+    if (recipientIds.length > 0)
+      await createActivity({
+        data: {
+          type: "COMMENT",
+          recipientIds,
+          actorId: session.user.id,
+          collectionId: data.collectionId,
+          commentId: comment.id,
+          commentBody: data.body,
+        },
+      })
+
+    return comment
   })
 
 const deleteComment = createServerFn({ method: "POST" })

@@ -85,7 +85,7 @@ function CollectionCard({
         </div>
       </Link>
       <CardHeader className="gap-2">
-        <CardTitle className="flex items-center gap-1">{name}</CardTitle>
+        <CardTitle className="block items-center truncate">{name}</CardTitle>
         <CardDescription className="no-scrollbar flex items-center gap-2 overflow-x-auto">
           {tags.slice(0, 3).map((tag, tagIndex) => (
             <Badge
