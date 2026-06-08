@@ -88,4 +88,19 @@ const getActivities = createServerFn({ method: "GET" }).handler(async () => {
   }
 })
 
-export { createActivity, markActivityRead, getActivities }
+const getUnread = createServerFn({ method: "GET" }).handler(async () => {
+  const session = await getSession()
+  if (!session) throw new Error("Unauthorized")
+
+  try {
+    const activities = await prisma.activity.findMany({
+      where: { recipientId: session.user.id, read: false },
+    })
+    return { hasUnread: activities.length > 0, count: activities.length }
+  } catch (err) {
+    console.error(err)
+    throw new Error("Failed to get unread activities")
+  }
+})
+
+export { createActivity, markActivityRead, getActivities, getUnread }

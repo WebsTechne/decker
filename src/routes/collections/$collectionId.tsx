@@ -527,7 +527,7 @@ function CollectionIdComponent() {
                     className="absolute inset-0 w-full object-contain"
                   />
                   <span className="font-heading absolute right-2 bottom-2 rounded-md bg-black/60 px-2 py-1 text-xs font-bold text-white">
-                    {i < 10 && "0"}
+                    {i < 9 && "0"}
                     {i + 1}
                   </span>
                 </div>

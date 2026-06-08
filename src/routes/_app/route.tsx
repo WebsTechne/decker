@@ -1,11 +1,15 @@
 import { Header } from "#/components/sections/header"
+import { Badge } from "#/components/ui/badge"
 import { Spinner } from "#/components/ui/spinner"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "#/components/ui/tooltip"
+import { getUnread } from "#/lib/activity"
+import { authClient } from "#/lib/auth-client"
 import { cn } from "#/lib/utils"
+import { useQuery } from "@tanstack/react-query"
 import {
   createFileRoute,
   Outlet,
@@ -34,13 +38,29 @@ export const Route = createFileRoute("/_app")({
 
 const tabs = [
   { to: "/", label: "Library", icon: Bookmark, fill: true, exactPath: true },
-  { to: "/activity", label: "Activity", icon: Bell, fill: true },
+  {
+    to: "/activity",
+    label: "Activity",
+    icon: Bell,
+    fill: true,
+    isActivity: true,
+  },
   { to: "/explore", label: "Explore", icon: Search },
   { to: "/upload", label: "Upload", icon: Plus },
 ]
 
 function AppLayout() {
+  const { data: session, isPending: authPending } = authClient.useSession()
   const { pathname } = useLocation()
+
+  const { data: activities = { hasUnread: false, count: 0 }, isPending } =
+    useQuery({
+      queryKey: ["activities", "nav"],
+      queryFn: () => getUnread(),
+      enabled: !!session && !authPending,
+    })
+
+  const { hasUnread, count } = activities
 
   return (
     <div className="app-shell flex h-dvh!">
@@ -48,36 +68,45 @@ function AppLayout() {
       <aside className="sidebar z-1010 hidden flex-col">
         <div className="flex-center h-12 w-full">{/* Decker */}</div>
         <nav className="flex w-full flex-1 flex-col justify-center gap-2">
-          {tabs.map(({ to, label, icon: Icon, exactPath, fill }) => {
-            const isActive = exactPath
-              ? pathname === to
-              : pathname.startsWith(to)
+          {tabs.map(
+            ({ to, label, icon: Icon, exactPath, isActivity, fill }) => {
+              const isActive = exactPath
+                ? pathname === to
+                : pathname.startsWith(to)
 
-            return (
-              <Tooltip key={to}>
-                <TooltipTrigger
-                  render={
-                    <Link
-                      to={to}
-                      className={cn(
-                        "flex-center aspect-square w-full",
-                        isActive ? "text-foreground" : "text-muted-foreground",
-                      )}
+              return (
+                <Tooltip key={to}>
+                  <TooltipTrigger
+                    render={
+                      <Link
+                        to={to}
+                        className={cn(
+                          "flex-center relative aspect-square w-full",
+                          isActive
+                            ? "text-foreground"
+                            : "text-muted-foreground",
+                        )}
+                      />
+                    }
+                  >
+                    {isActivity && hasUnread && (
+                      <Badge className="bg-destructive! absolute top-0 right-0 text-white!">
+                        {count}
+                      </Badge>
+                    )}
+                    <Icon
+                      size={24}
+                      fill={isActive && fill ? "currentColor" : "transparent"}
+                      strokeWidth={isActive && !fill ? 3 : 2}
                     />
-                  }
-                >
-                  <Icon
-                    size={24}
-                    fill={isActive && fill ? "currentColor" : "transparent"}
-                    strokeWidth={isActive && !fill ? 3 : 2}
-                  />
-                </TooltipTrigger>
-                <TooltipContent side="right" align="center">
-                  {label}
-                </TooltipContent>
-              </Tooltip>
-            )
-          })}
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="center">
+                    {label}
+                  </TooltipContent>
+                </Tooltip>
+              )
+            },
+          )}
         </nav>
       </aside>
 
@@ -90,29 +119,39 @@ function AppLayout() {
 
         {/* Bottom bar — mobile only */}
         <nav className="bottom-bar bg-background sticky right-0 bottom-0 left-0 z-1000 flex h-max border-t md:hidden">
-          {tabs.map(({ to, label, icon: Icon, exactPath, fill }) => {
-            const isActive = exactPath
-              ? pathname === to
-              : pathname.startsWith(to)
+          {tabs.map(
+            ({ to, label, icon: Icon, exactPath, isActivity, fill }) => {
+              const isActive = exactPath
+                ? pathname === to
+                : pathname.startsWith(to)
 
-            return (
-              <Link
-                key={to}
-                to={to}
-                className={cn(
-                  "bottom-tab text-foreground flex-center h-14 flex-1 flex-col gap-0.5 text-xs",
-                  isActive ? "font-bold" : "",
-                )}
-              >
-                <Icon
-                  size={24}
-                  fill={isActive && fill ? "currentColor" : "transparent"}
-                  strokeWidth={isActive && !fill ? 3 : 2}
-                />
-                <span>{label}</span>
-              </Link>
-            )
-          })}
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={cn(
+                    "bottom-tab text-foreground flex-center h-14 flex-1 flex-col gap-0.5 text-xs",
+                    isActive ? "font-bold" : "",
+                  )}
+                >
+                  <span className="relative size-max">
+                    {isActivity && hasUnread && (
+                      <Badge className="bg-destructive! absolute -top-1 -right-3/4 px-1.5! text-white!">
+                        {count}
+                      </Badge>
+                    )}
+
+                    <Icon
+                      size={24}
+                      fill={isActive && fill ? "currentColor" : "transparent"}
+                      strokeWidth={isActive && !fill ? 3 : 2}
+                    />
+                  </span>
+                  <span>{label}</span>
+                </Link>
+              )
+            },
+          )}
         </nav>
       </section>
     </div>

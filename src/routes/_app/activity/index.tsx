@@ -16,7 +16,7 @@ function ActivityPage() {
   const queryClient = useQueryClient()
 
   const { data: activities = [], isPending } = useQuery({
-    queryKey: ["activities"],
+    queryKey: ["activities", "list"],
     queryFn: getActivities,
     enabled: !!session && !authPending,
     staleTime: 1000 * 60 * 5,
