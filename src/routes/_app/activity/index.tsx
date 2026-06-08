@@ -6,10 +6,24 @@ import { cn } from "#/lib/utils"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { formatListTimestamp } from "../../../lib/format-timestamp"
+import { Skeleton } from "#/components/ui/skeleton"
 
 export const Route = createFileRoute("/_app/activity/")({
   component: ActivityPage,
 })
+
+const widths = ["70%", "80%", "50%"]
+
+function ActivitySkeleton({ width }: { width: string }) {
+  return (
+    <div className="h-17 shrink-0">
+      <div className="mx-auto flex h-full w-full shrink-0 items-center gap-2 overflow-x-clip px-2 sm:max-w-160 md:max-w-3xl">
+        <Skeleton className="size-9 rounded-full" />
+        <Skeleton className="h-7 rounded-md" style={{ width }} />
+      </div>
+    </div>
+  )
+}
 
 function ActivityPage() {
   const { data: session, isPending: authPending } = authClient.useSession()
@@ -22,10 +36,12 @@ function ActivityPage() {
     staleTime: 1000 * 60 * 5,
   })
 
-  if (authPending)
+  if (authPending || isPending)
     return (
-      <div className="flex-center h-[calc(100dvh-48px-56px)]">
-        <Spinner className="size-7" />
+      <div className="flex h-[calc(100dvh-48px-56px)] flex-col">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <ActivitySkeleton key={i} width={widths[i]} />
+        ))}
       </div>
     )
 
@@ -66,6 +82,8 @@ function ActivityPage() {
         queryClient.invalidateQueries({ queryKey: ["activites"] })
       })
   }
+
+  console.table(activities)
 
   return (
     <div className="flex flex-col">
