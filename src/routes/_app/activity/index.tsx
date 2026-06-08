@@ -16,7 +16,7 @@ function ActivityPage() {
   const queryClient = useQueryClient()
 
   const { data: activities = [], isPending } = useQuery({
-    queryKey: ["activities", "list"],
+    queryKey: ["activities"],
     queryFn: getActivities,
     enabled: !!session && !authPending,
     staleTime: 1000 * 60 * 5,
@@ -46,17 +46,25 @@ function ActivityPage() {
 
   const handleActivityClick = (activityId: string) => {
     // optimistically update cache immediately
-    queryClient.setQueryData(["activities"], (old: typeof activities) =>
-      old.map((a) => (a.id === activityId ? { ...a, read: true } : a)),
+    queryClient.setQueryData(
+      ["activities"],
+      (old: typeof activities | undefined) =>
+        old?.map((a) => (a.id === activityId ? { ...a, read: true } : a)),
     )
 
     // fire and forget — server updates in background
-    markActivityRead({ data: { activityId } }).catch(() => {
-      // rollback on failure
-      queryClient.setQueryData(["activities"], (old: typeof activities) =>
-        old.map((a) => (a.id === activityId ? { ...a, read: false } : a)),
-      )
-    })
+    markActivityRead({ data: { activityId } })
+      // .catch(() => {
+      //   // rollback on failure
+      //   queryClient.setQueryData(
+      //     ["activities"],
+      //     (old: typeof activities | undefined) =>
+      //       old?.map((a) => (a.id === activityId ? { ...a, read: false } : a)),
+      //   )
+      // })
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["activites"] })
+      })
   }
 
   return (
@@ -73,10 +81,10 @@ function ActivityPage() {
               if (isUnread) handleActivityClick(activity.id)
             }}
             className={cn(
-              "flex-center cursor-pointer",
+              "flex-center cursor-pointer duration-200",
               isUnread
-                ? "text-foreground bg-cyan-600/20 font-semibold"
-                : "text-muted-foreground",
+                ? "text-foreground bg-cyan-600/10 font-semibold hover:bg-cyan-600/20"
+                : "text-muted-foreground hover:bg-muted/50",
             )}
           >
             <div className="flex w-full shrink-0 items-center gap-2 overflow-x-clip px-2 py-4 sm:max-w-160 md:max-w-3xl">
