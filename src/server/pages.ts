@@ -51,4 +51,22 @@ const reorderPages = createServerFn({ method: "POST" })
     )
   })
 
-export { createPages, reorderPages }
+const deletePages = createServerFn({ method: "POST" })
+  .inputValidator((data: { pageIds: string[] }) => data)
+  .handler(async ({ data }) => {
+    const session = await getSession()
+    if (!session) throw new Error("Unauthorized")
+
+    try {
+      await prisma.page.deleteMany({
+        where: {
+          id: { in: data.pageIds },
+        },
+      })
+    } catch (err) {
+      console.error(err)
+      throw new Error("Failed to delete")
+    }
+  })
+
+export { createPages, reorderPages, deletePages }

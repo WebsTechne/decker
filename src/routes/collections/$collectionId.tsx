@@ -6,6 +6,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -15,7 +16,7 @@ import { Button } from "#/components/ui/button"
 import { Field, FieldGroup } from "#/components/ui/field"
 import { Spinner } from "#/components/ui/spinner"
 import { authClient } from "#/lib/auth-client"
-import { uploadPages } from "#/lib/upload"
+import { uploadPages } from "#/lib/pages/upload"
 import { cn } from "#/lib/utils"
 import {
   getCollectionById,
@@ -29,6 +30,7 @@ import {
   ArrowRight01Icon,
   Bookmark02Icon,
   Comment01Icon,
+  Delete02Icon,
   File02Icon,
   PencilEdit02Icon,
   Plus,
@@ -47,8 +49,9 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { CommentsSheet } from "#/components/sections/comment-section"
 import { EditCollectionSheet } from "#/components/sections/edit-collection-section"
-import { createPages } from "#/server/pages"
+import { createPages, deletePages } from "#/server/pages"
 import { createActivity } from "#/lib/activity"
+import { Checkbox } from "#/components/ui/checkbox"
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionIdComponent,
@@ -122,6 +125,9 @@ function CollectionIdComponent() {
   const [isUploading, setIsUploading] = useState(false)
   const [commentsOpen, setCommentsOpen] = useState(false)
   const [editSectionOpen, setEditSectionOpen] = useState(false)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+  const [selectedPage, setSelectedPage] = useState<number | null>(null)
+  const [selectedPages, setSelectedPages] = useState<string[]>([])
 
   const { collectionId } = useParams({ from: "/collections/$collectionId" })
   const { data: collection, isPending } = useQuery({
@@ -234,23 +240,6 @@ function CollectionIdComponent() {
       </div>
     )
 
-  const handleToggleSave = async () => {
-    if (isMine) return
-
-    const previousValue = isSaved
-
-    // optimistic update
-    setSaved(!previousValue)
-
-    try {
-      await toggleSaveCollection({ data: { collectionId } })
-    } catch {
-      // rollback if server fails
-      setSaved(previousValue)
-      toast.error("Failed to update save")
-    }
-  }
-
   const {
     author,
     contributors,
@@ -262,8 +251,12 @@ function CollectionIdComponent() {
     },
   } = collection
 
+  const originallySaved = collection.saves.length > 0
+
   const savesCount =
-    rawSavesCount + (isSaved ? 1 : 0) - (collection.saves.length > 0 ? 1 : 0)
+    rawSavesCount +
+    (isSaved && !originallySaved ? 1 : 0) -
+    (!isSaved && originallySaved ? 1 : 0)
   const isMine =
     session.user.id === author.id ||
     contributors.some((c) => c.user.id === session.user.id)
@@ -333,6 +326,49 @@ function CollectionIdComponent() {
       toast.error("Failed to upload pages")
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleSelectPages = (i: number) => {
+    if (selectedPages.includes(i)) {
+      setSelectedPages(selectedPages.filter((p) => p !== i))
+    } else {
+      setSelectedPages((prev) => [...prev, i])
+    }
+  }
+
+  const handleDeletePages = async (pageIds: string[]) => {
+    const isSingle = pageIds.length === 1
+    toast.loading(`Deleting ${isSingle ? "page" : "pages"}...`, {
+      id: "delete-pages-toast",
+    })
+    try {
+      await deletePages({ data: { pageIds } })
+      toast.dismiss("delete-pages-toast")
+      toast.success(`Page${isSingle ? "" : "s"} deleted!`)
+
+      queryClient.invalidateQueries({ queryKey: ["collections", collectionId] })
+    } catch (err) {
+      console.error(err)
+      toast.dismiss("delete-pages-toast")
+      toast.error("Failed to delete pages")
+    }
+  }
+
+  const handleToggleSave = async () => {
+    if (isMine) return
+
+    const previousValue = isSaved
+
+    // optimistic update
+    setSaved(!previousValue)
+
+    try {
+      await toggleSaveCollection({ data: { collectionId } })
+    } catch {
+      // rollback if server fails
+      setSaved(previousValue)
+      toast.error("Failed to update save")
     }
   }
 
@@ -509,7 +545,6 @@ function CollectionIdComponent() {
                 <div
                   key={page.id}
                   className="bg-muted dark:bg-card relative mb-1 cursor-pointer break-inside-avoid md:mb-2"
-                  onClick={() => setLightboxIndex(i)}
                   style={
                     page.width && page.height
                       ? {
@@ -522,11 +557,37 @@ function CollectionIdComponent() {
                     src={page.imageUrl}
                     alt={`Page: ${i + 1}`}
                     loading="lazy"
+                    onClick={() => setLightboxIndex(i)}
                     onContextMenu={(e) => e.preventDefault()}
                     onDragStart={(e) => e.preventDefault()}
                     className="absolute inset-0 w-full object-contain"
                   />
-                  <span className="font-heading absolute right-2 bottom-2 rounded-md bg-black/60 px-2 py-1 text-xs font-bold text-white">
+
+                  {isMine && (
+                    <>
+                      <button className="hover:bg-muted/30 flex-center absolute top-2 left-2 rounded-md p-2">
+                        <Checkbox
+                          checked={selectedPages.includes(page.id)}
+                          onCheckedChange={() => handleSelectPages(page.id)}
+                        />
+                      </button>
+
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="bg-destructive/80! absolute top-2 right-2 text-white!"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setSelectedPage(i)
+                          setConfirmDeleteOpen(true)
+                        }}
+                      >
+                        <HugeiconsIcon icon={Delete02Icon} />
+                      </Button>
+                    </>
+                  )}
+
+                  <span className="font-heading pointer-events-none absolute right-2 bottom-2 rounded-md bg-black/60 px-2 py-1 text-xs font-bold text-white">
                     {i < 9 && "0"}
                     {i + 1}
                   </span>
@@ -585,47 +646,6 @@ function CollectionIdComponent() {
         </section>
       </div>
 
-      <AlertDialog
-        open={uploadDialogOpen}
-        onOpenChange={(open) => {
-          setUploadDialogOpen(open)
-          if (!open) setUploadFiles([])
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Add pages</AlertDialogTitle>
-          </AlertDialogHeader>
-          <FieldGroup>
-            <Field>
-              <DropZone
-                multiple
-                startIndex={pages.length}
-                onFiles={(files) => setUploadFiles(files)}
-              />
-            </Field>
-          </FieldGroup>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isUploading}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isUploading || uploadFiles.length === 0}
-              onClick={(e) => {
-                e.preventDefault()
-                handleAddPages()
-              }}
-            >
-              {isUploading ? (
-                <>
-                  <Spinner /> Uploading...
-                </>
-              ) : (
-                "Upload"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {lightboxIndex !== null && (
         <div
           className="fixed inset-0 z-9999 flex items-center justify-center bg-black/80"
@@ -679,6 +699,75 @@ function CollectionIdComponent() {
           </span>
         </div>
       )}
+
+      <AlertDialog
+        open={uploadDialogOpen}
+        onOpenChange={(open) => {
+          setUploadDialogOpen(open)
+          if (!open) setUploadFiles([])
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add pages</AlertDialogTitle>
+          </AlertDialogHeader>
+          <FieldGroup>
+            <Field>
+              <DropZone
+                multiple
+                startIndex={pages.length}
+                onFiles={(files) => setUploadFiles(files)}
+              />
+            </Field>
+          </FieldGroup>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isUploading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isUploading || uploadFiles.length === 0}
+              onClick={(e) => {
+                e.preventDefault()
+                handleAddPages()
+              }}
+            >
+              {isUploading ? (
+                <>
+                  <Spinner /> Uploading...
+                </>
+              ) : (
+                "Upload"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete page?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete page{" "}
+              <span className="bg-muted rounded-sm px-2 py-0.5 font-semibold">
+                {selectedPage !== null ? selectedPage + 1 : ""}
+              </span>
+              ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                if (selectedPage === null) return
+                setConfirmDeleteOpen(false)
+                handleDeletePages([orderedPages[selectedPage].id])
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <CommentsSheet
         collectionId={collectionId}

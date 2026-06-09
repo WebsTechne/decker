@@ -37,7 +37,7 @@ import {
 } from "#/components/ui/input-group"
 import { ScrollArea } from "#/components/ui/scroll-area"
 import { Spinner } from "#/components/ui/spinner"
-import { uploadPages } from "#/lib/upload"
+import { uploadPages } from "#/lib/pages/upload"
 import { createCollection, deleteCollection } from "#/server/collections"
 import { createPages } from "#/server/pages"
 import { createTag, getTags } from "#/server/tags"

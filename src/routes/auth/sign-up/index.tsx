@@ -21,7 +21,7 @@ import { z } from "zod"
 import { Button } from "#/components/ui/button"
 import { authClient } from "#/lib/auth-client"
 import { toast } from "sonner"
-import { uploadAvatar } from "#/lib/upload"
+import { uploadAvatar } from "#/lib/pages/upload"
 import { updateUserProfile, deleteUser } from "#/server/users"
 
 export const Route = createFileRoute("/auth/sign-up/")({

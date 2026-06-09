@@ -1,6 +1,6 @@
-import { supabase } from "./supabase"
+import { supabase } from "../supabase"
 import imageCompression from "browser-image-compression"
-import { getImageDimensions } from "./dimensions"
+import { getImageDimensions } from "../dimensions"
 
 const PAGE_MAX_MB = 5.5 // just under the 6MB bucket limit
 const AVATAR_MAX_MB = 4 // because I feel like 4mb
@@ -44,9 +44,6 @@ async function uploadAvatar(file: File, userId: string) {
 }
 
 async function uploadPage(file: File, collectionId: string, position: number) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
   const [processed, dimensions] = await Promise.all([
     compressIfNeeded(file, PAGE_MAX_MB),
     getImageDimensions(file), // get from original before compression

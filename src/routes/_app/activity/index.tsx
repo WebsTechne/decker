@@ -45,7 +45,7 @@ function ActivityPage() {
       </div>
     )
 
-  if (!isPending && activities.length < 1)
+  if (activities.length < 1)
     return (
       <div className="flex-center h-[calc(100dvh-48px-56px)] px-5">
         <div>
