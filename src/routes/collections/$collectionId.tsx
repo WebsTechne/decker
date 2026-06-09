@@ -52,6 +52,7 @@ import { EditCollectionSheet } from "#/components/sections/edit-collection-secti
 import { createPages, deletePages } from "#/server/pages"
 import { createActivity } from "#/lib/activity"
 import { Checkbox } from "#/components/ui/checkbox"
+import { deleteSupabasePages } from "#/lib/pages/delete"
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionIdComponent,
@@ -329,12 +330,11 @@ function CollectionIdComponent() {
     }
   }
 
-  const handleSelectPages = (i: number) => {
-    if (selectedPages.includes(i)) {
-      setSelectedPages(selectedPages.filter((p) => p !== i))
-    } else {
-      setSelectedPages((prev) => [...prev, i])
-    }
+  const handleSelectPages = (i: string) => {
+    setSelectedPage(null)
+    setSelectedPages((prev) =>
+      prev.includes(i) ? prev.filter((p) => p !== i) : [...prev, i],
+    )
   }
 
   const handleDeletePages = async (pageIds: string[]) => {
@@ -342,11 +342,17 @@ function CollectionIdComponent() {
     toast.loading(`Deleting ${isSingle ? "page" : "pages"}...`, {
       id: "delete-pages-toast",
     })
+
+    const pagePaths = orderedPages
+      .filter((p) => pageIds.includes(p.id))
+      .map((p) => p.imageUrl)
+
     try {
+      await deleteSupabasePages(pagePaths, collectionId)
       await deletePages({ data: { pageIds } })
       toast.dismiss("delete-pages-toast")
       toast.success(`Page${isSingle ? "" : "s"} deleted!`)
-
+      setSelectedPages([])
       queryClient.invalidateQueries({ queryKey: ["collections", collectionId] })
     } catch (err) {
       console.error(err)
@@ -365,6 +371,7 @@ function CollectionIdComponent() {
 
     try {
       await toggleSaveCollection({ data: { collectionId } })
+      queryClient.invalidateQueries({ queryKey: ["collections", collectionId] })
     } catch {
       // rollback if server fails
       setSaved(previousValue)
@@ -540,6 +547,30 @@ function CollectionIdComponent() {
           </section>
 
           <main className="relative flex-1 md:px-4">
+            {isMine && selectedPages.length > 0 && (
+              <div className="sticky top-0 flex gap-4 py-2">
+                <Button
+                  className="bg-destructive/80! text-white! shadow-lg"
+                  onClick={() => {
+                    setSelectedPage(null)
+                    setConfirmDeleteOpen(true)
+                  }}
+                >
+                  Delete selected ({selectedPages.length})
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedPage(null)
+                    setSelectedPages([])
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
+
             <div className="columns-1 gap-1 sm:columns-2 md:gap-2 lg:columns-3 2xl:columns-4">
               {orderedPages.map((page, i) => (
                 <div
@@ -560,7 +591,13 @@ function CollectionIdComponent() {
                     onClick={() => setLightboxIndex(i)}
                     onContextMenu={(e) => e.preventDefault()}
                     onDragStart={(e) => e.preventDefault()}
-                    className="absolute inset-0 w-full object-contain"
+                    className={cn(
+                      "absolute inset-0 w-full object-contain",
+                      isMine &&
+                        selectedPages.length > 0 &&
+                        !selectedPages.includes(page.id) &&
+                        "opacity-50",
+                    )}
                   />
 
                   {isMine && (
@@ -578,6 +615,7 @@ function CollectionIdComponent() {
                         className="bg-destructive/80! absolute top-2 right-2 text-white!"
                         onClick={(e) => {
                           e.preventDefault()
+                          setSelectedPages([])
                           setSelectedPage(i)
                           setConfirmDeleteOpen(true)
                         }}
@@ -744,12 +782,23 @@ function CollectionIdComponent() {
       <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete page?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {selectedPages.length > 0
+                ? `Delete ${selectedPages.length} pages?`
+                : "Delete page?"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete page{" "}
-              <span className="bg-muted rounded-sm px-2 py-0.5 font-semibold">
-                {selectedPage !== null ? selectedPage + 1 : ""}
-              </span>
+              Are you sure you want to delete{" "}
+              {selectedPages.length > 0 ? (
+                <>selected pages ({selectedPages.length})</>
+              ) : (
+                <>
+                  page{" "}
+                  <span className="bg-muted rounded-sm px-2 py-0.5 font-semibold">
+                    {selectedPage !== null ? selectedPage + 1 : ""}
+                  </span>
+                </>
+              )}
               ?
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -758,9 +807,16 @@ function CollectionIdComponent() {
             <AlertDialogAction
               variant="destructive"
               onClick={() => {
-                if (selectedPage === null) return
                 setConfirmDeleteOpen(false)
-                handleDeletePages([orderedPages[selectedPage].id])
+
+                if (selectedPages.length > 0) {
+                  handleDeletePages(selectedPages)
+                  return
+                }
+
+                if (selectedPage !== null) {
+                  handleDeletePages([orderedPages[selectedPage].id])
+                }
               }}
             >
               Delete
