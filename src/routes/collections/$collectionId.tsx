@@ -548,7 +548,7 @@ function CollectionIdComponent() {
 
           <main className="relative flex-1 md:px-4">
             {isMine && selectedPages.length > 0 && (
-              <div className="sticky top-0 flex gap-4 py-2">
+              <div className="bg-background sticky top-0 z-100 flex gap-4 py-2">
                 <Button
                   className="bg-destructive/80! text-white! shadow-lg"
                   onClick={() => {
