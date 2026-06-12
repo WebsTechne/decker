@@ -56,7 +56,9 @@ function CollectionCard({
   } = collection
   if (!session) return <CollectionCardSkeleton />
 
-  const isMine = session.user.id === author.id
+  const isMine =
+    session.user.id === author.id ||
+    contributors.some((c) => c.user.id === session.user.id)
   const isSaved = saves.length > 0
 
   return (
