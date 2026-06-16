@@ -2,14 +2,17 @@ import { defineConfig } from "vite"
 import { devtools } from "@tanstack/devtools-vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import { nitro } from "nitro/vite"
+
 import viteReact from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
 
-export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
+const config = defineConfig({
+  nitro: {
+    devServer: {
+      watch: [],
+    },
   },
-
+  resolve: { tsconfigPaths: true },
   ssr: {
     external: [
       "@prisma/client",
@@ -24,7 +27,18 @@ export default defineConfig({
     ],
     noExternal: ["@better-auth/core", "better-auth"],
   },
-
+  server: {
+    host: "0.0.0.0",
+    port: 3000,
+    watch: {
+      usePolling: true,
+    },
+    hmr: {
+      host: "10.94.8.24", // Forces the WebSocket client to use this specific IP
+      port: 3000, // Explicitly matches your server port
+      protocol: "ws",
+    },
+  },
   optimizeDeps: {
     include: [
       "react",
@@ -51,8 +65,8 @@ export default defineConfig({
       "seroval",
     ],
   },
-
   cacheDir: ".vite-cache",
-
-  plugins: [devtools(), nitro(), tailwindcss(), tanstackStart(), viteReact()],
+  plugins: [devtools(), tailwindcss(), tanstackStart(), nitro(), viteReact()],
 })
+
+export default config

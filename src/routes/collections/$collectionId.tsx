@@ -31,6 +31,7 @@ import {
   Bookmark02Icon,
   Comment01Icon,
   Delete02Icon,
+  Download01Icon,
   File02Icon,
   PencilEdit02Icon,
   Plus,
@@ -429,6 +430,18 @@ function CollectionIdComponent() {
           </ul>
 
           <div className="flex-center flex-col gap-2">
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              onClick={() => setEditSectionOpen(true)}
+            >
+              <HugeiconsIcon
+                icon={Download01Icon}
+                strokeWidth={2}
+                className="size-6!"
+              />
+            </Button>
+
             {isMine && (
               <Button
                 variant="ghost"
@@ -441,7 +454,8 @@ function CollectionIdComponent() {
                   className="size-6!"
                 />
               </Button>
-            )}{" "}
+            )}
+
             <ThemeToggle className="" />
           </div>
         </aside>
@@ -464,6 +478,18 @@ function CollectionIdComponent() {
               </Button>
 
               <section className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  onClick={() => setEditSectionOpen(true)}
+                >
+                  <HugeiconsIcon
+                    icon={Download01Icon}
+                    strokeWidth={2}
+                    className="size-6!"
+                  />
+                </Button>
+
                 {isMine && (
                   <Button
                     variant="ghost"
@@ -477,6 +503,7 @@ function CollectionIdComponent() {
                     />
                   </Button>
                 )}
+
                 <ThemeToggle />
               </section>
             </header>
