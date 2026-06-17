@@ -64,11 +64,9 @@ export function ProfileStep({
         data: { school: schoolInputRef.current?.value ?? "" },
       })
       queryClient.invalidateQueries({ queryKey: ["schools"] })
-      toast.dismiss("create-school-toast")
-      toast.success("School added")
+      toast.success("School added", { id: "create-school-toast" })
     } catch (err) {
-      toast.dismiss("create-school-toast")
-      toast.error("Failed to add school.")
+      toast.error("Failed to add school.", { id: "create-school-toast" })
       console.error("❌ createSchool error:", err)
     }
   }
@@ -79,11 +77,9 @@ export function ProfileStep({
         data: { department: departmentInputRef.current?.value ?? "" },
       })
       queryClient.invalidateQueries({ queryKey: ["departments"] })
-      toast.dismiss("create-department-toast")
-      toast.success("Department added")
+      toast.success("Department added", { id: "create-school-toast" })
     } catch (err) {
-      toast.dismiss("create-department-toast")
-      toast.error("Failed to add department.")
+      toast.error("Failed to add department.", { id: "create-school-toast" })
       console.error("❌ createDepartment error:", err)
     }
   }

@@ -133,16 +133,14 @@ function UploadPage() {
 
         collectionId = collection.id
 
-        toast.dismiss("upload-toast")
-        toast.success("Collection created!")
+        toast.success("Collection created!", { id: "upload-toast" })
         navigate({ to: `/collections/${collection.id}` })
       } catch (err) {
         console.error(err)
         if (collectionId) {
           await deleteCollection({ data: { collectionId } })
         }
-        toast.dismiss("upload-toast")
-        toast.error("Failed to create collection")
+        toast.error("Failed to create collection", { id: "upload-toast" })
       }
     },
   })
@@ -184,11 +182,9 @@ function UploadPage() {
         data: { tag: comboboxChipsInputRef.current?.value ?? "" },
       })
       queryClient.invalidateQueries({ queryKey: ["tags"] })
-      toast.dismiss("create-tag-toast")
-      toast.success("Tag created")
+      toast.success("Tag created", { id: "create-tag-toast" })
     } catch (err) {
-      toast.dismiss("create-tag-toast")
-      toast.error("Failed to create tag.")
+      toast.error("Failed to create tag.", { id: "create-tag-toast" })
       console.error("❌ createTag error:", err)
     }
   }

@@ -316,8 +316,7 @@ function CollectionIdComponent() {
           },
         })
 
-      toast.dismiss("add-pages-toast")
-      toast.success("Pages added!")
+      toast.success("Pages added!", { id: "add-pages-toast" })
       setUploadDialogOpen(false)
       setUploadFiles([])
 
@@ -325,8 +324,7 @@ function CollectionIdComponent() {
       queryClient.invalidateQueries({ queryKey: ["collections", collectionId] })
     } catch (err) {
       console.error(err)
-      toast.dismiss("add-pages-toast")
-      toast.error("Failed to upload pages")
+      toast.error("Failed to upload pages", { id: "add-pages-toast" })
     } finally {
       setIsUploading(false)
     }
@@ -352,14 +350,14 @@ function CollectionIdComponent() {
     try {
       await deleteSupabasePages(pagePaths, collectionId)
       await deletePages({ data: { pageIds } })
-      toast.dismiss("delete-pages-toast")
-      toast.success(`Page${isSingle ? "" : "s"} deleted!`)
+      toast.success(`Page${isSingle ? "" : "s"} deleted!`, {
+        id: "delete-pages-toast",
+      })
       setSelectedPages([])
       queryClient.invalidateQueries({ queryKey: ["collections", collectionId] })
     } catch (err) {
       console.error(err)
-      toast.dismiss("delete-pages-toast")
-      toast.error("Failed to delete pages")
+      toast.error("Failed to delete pages", { id: "delete-pages-toast" })
     }
   }
 
@@ -397,7 +395,6 @@ function CollectionIdComponent() {
           })
         },
       })
-      // toast.dismiss("download-collection-toast")
       toast.success("Download ready!", { id: "download-collection-toast" })
     } catch {
       toast.error("Failed to download collection", {

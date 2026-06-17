@@ -79,8 +79,9 @@ function SignIn() {
             })
 
         if (res.error) {
-          toast.dismiss("sign-in-toast")
-          toast.error(res.error.message ?? "Failed to sign in")
+          toast.error(res.error.message ?? "Failed to sign in", {
+            id: "sign-in-toast",
+          })
           switch (res.error.code) {
             case "INVALID_EMAIL_OR_PASSWORD":
               setError("Incorrect username/email or password.")
@@ -91,13 +92,11 @@ function SignIn() {
           }
         }
 
-        toast.dismiss("sign-in-toast")
-        toast.success("Sign in successful")
+        toast.success("Sign in successful", { id: "sign-in-toast" })
         navigate({ to: search.redirect ?? "/" })
       } catch (err) {
         console.error(err)
-        toast.dismiss("sign-in-toast")
-        toast.error("Sign in failed, please try again")
+        toast.error("Sign in failed, please try again", { id: "sign-in-toast" })
       }
     },
   })

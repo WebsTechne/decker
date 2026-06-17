@@ -105,8 +105,9 @@ function SignUp() {
         })
 
         if (!res.data?.user) {
-          toast.dismiss("sign-up-toast")
-          toast.error(res.error?.message ?? "Failed to create account") // 👈 show actual error
+          toast.error(res.error?.message ?? "Failed to create account", {
+            id: "sign-up-toast",
+          }) // 👈 show actual error
           return
         }
 
@@ -130,16 +131,14 @@ function SignUp() {
         })
 
         // 4 redirect
-        toast.dismiss("sign-up-toast")
-        toast.success("Sign up successful")
+        toast.success("Sign up successful", { id: "sign-up-toast" })
         navigate({ to: search.redirect ?? "/" })
       } catch (err) {
         console.error(err)
         // 5 cleanup — delete the created user
         if (userId) await deleteUser({ data: { userId } })
 
-        toast.dismiss("sign-up-toast")
-        toast.error("Sign up failed, please try again")
+        toast.error("Sign up failed, please try again", { id: "sign-up-toast" })
       }
     },
   })
