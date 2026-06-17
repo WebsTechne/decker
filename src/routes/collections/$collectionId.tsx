@@ -456,6 +456,7 @@ function CollectionIdComponent() {
             <Button
               variant="ghost"
               size="icon-lg"
+              className={!isMine && !isSaved && "opacity-50"}
               onClick={() => handleDownload()}
             >
               <HugeiconsIcon
@@ -504,6 +505,7 @@ function CollectionIdComponent() {
                 <Button
                   variant="ghost"
                   size="icon-lg"
+                  className={!isMine && !isSaved && "opacity-50"}
                   onClick={() => handleDownload()}
                 >
                   <HugeiconsIcon
