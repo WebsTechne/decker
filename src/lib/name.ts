@@ -64,9 +64,15 @@ const nouns = [
   "apex",
 ]
 
-export function generateUsername() {
+function generateUsername() {
   const adj = adjectives[Math.floor(Math.random() * adjectives.length)]
   const noun = nouns[Math.floor(Math.random() * nouns.length)]
   const num = Math.floor(Math.random() * 999)
   return `${adj}_${noun}${num}`
 }
+
+function safeFileName(name: string) {
+  return name.replace(/[<>:"/\\|?*]/g, "-").trim()
+}
+
+export { safeFileName, generateUsername }

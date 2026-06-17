@@ -128,22 +128,21 @@ enum UserRole {
 // --- Core models ---
 
 model Collection {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  bannerUrl   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  author   User   @relation("AuthoredCollections", fields: [authorId], references: [id])
-  authorId String
-
-  pages        Page[]
-  tags         CollectionTag[]
-  saves        Save[]
-  contributors Contributor[]
-  comments     Comment[]
-  activities   Activity[]
+  id            String          @id @default(cuid())
+  name          String
+  description   String?
+  bannerUrl     String?
+  downloadCount Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  author        User            @relation("AuthoredCollections", fields: [authorId], references: [id])
+  authorId      String
+  pages         Page[]
+  tags          CollectionTag[]
+  saves         Save[]
+  contributors  Contributor[]
+  comments      Comment[]
+  activities    Activity[]
 }
 
 model Page {

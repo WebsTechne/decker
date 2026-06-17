@@ -54,6 +54,7 @@ import { createPages, deletePages } from "#/server/pages"
 import { createActivity } from "#/lib/activity"
 import { Checkbox } from "#/components/ui/checkbox"
 import { deleteSupabasePages } from "#/lib/pages/delete"
+import { downloadCollection } from "#/lib/pages/download"
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionIdComponent,
@@ -380,6 +381,31 @@ function CollectionIdComponent() {
     }
   }
 
+  const handleDownload = async () => {
+    if (!isMine && !isSaved) {
+      toast.info("Save this collection to your library before downloading")
+      return
+    }
+    try {
+      toast.loading("Preparing download...", {
+        id: "download-collection-toast",
+      })
+      await downloadCollection(collection.name, orderedPages, {
+        onProgress(percent) {
+          toast.loading(`Creating zip (${Math.round(percent)}%)`, {
+            id: "download-collection-toast",
+          })
+        },
+      })
+      // toast.dismiss("download-collection-toast")
+      toast.success("Download ready!", { id: "download-collection-toast" })
+    } catch {
+      toast.error("Failed to download collection", {
+        id: "download-collection-toast",
+      })
+    }
+  }
+
   return (
     <>
       <div className="flex h-dvh">
@@ -433,7 +459,7 @@ function CollectionIdComponent() {
             <Button
               variant="ghost"
               size="icon-lg"
-              onClick={() => setEditSectionOpen(true)}
+              onClick={() => handleDownload()}
             >
               <HugeiconsIcon
                 icon={Download01Icon}
@@ -481,7 +507,7 @@ function CollectionIdComponent() {
                 <Button
                   variant="ghost"
                   size="icon-lg"
-                  onClick={() => setEditSectionOpen(true)}
+                  onClick={() => handleDownload()}
                 >
                   <HugeiconsIcon
                     icon={Download01Icon}

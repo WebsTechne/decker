@@ -16,7 +16,7 @@ import { useState } from "react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
 import type { SignUpForm } from "#/routes/auth/sign-up"
 import z from "zod"
-import { generateUsername } from "#/lib/generate-username"
+import { generateUsername } from "#/lib/name"
 
 export function AccountStep({
   form,
