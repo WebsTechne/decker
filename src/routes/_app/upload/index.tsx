@@ -105,13 +105,13 @@ function UploadPage() {
         })
 
         // 2 Upload pages with progress
-        let uploadedCount = 0
+        // let uploadedCount = 0
         const pages = await uploadPages(
           value.images,
           collection.id,
           0,
           (uploaded, total) => {
-            uploadedCount = uploaded
+            // uploadedCount = uploaded
             toast.loading(`Uploading ${uploaded} of ${total} pages...`, {
               id: "upload-toast",
             })

@@ -256,6 +256,13 @@ function CollectionIdComponent() {
 
   const originallySaved = collection.saves.length > 0
 
+  const highestPosition = Math.max(
+    -1,
+    ...collection.pages.map((p) => p.position),
+  )
+
+  const startPosition = highestPosition + 1
+
   const savesCount =
     rawSavesCount +
     (isSaved && !originallySaved ? 1 : 0) -
@@ -277,7 +284,7 @@ function CollectionIdComponent() {
       const uploaded = await uploadPages(
         uploadFiles,
         collectionId,
-        pages.length,
+        startPosition,
         (done, total) => {
           toast.loading(`Uploading ${done} of ${total}...`, {
             id: "add-pages-toast",

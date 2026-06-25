@@ -1,6 +1,7 @@
 import { supabase } from "../supabase"
 import imageCompression from "browser-image-compression"
 import { getImageDimensions } from "../dimensions"
+import { nanoid } from "nanoid"
 
 const PAGE_MAX_MB = 5.5 // just under the 6MB bucket limit
 const AVATAR_MAX_MB = 4 // because I feel like 4mb
@@ -50,12 +51,12 @@ async function uploadPage(file: File, collectionId: string, position: number) {
   ])
   const rawExt = file.name.split(".").pop()?.toLowerCase() ?? "jpg"
   const ext = rawExt === "jpeg" ? "jpg" : rawExt // normalize jpeg → jpg
-  const path = `${collectionId}/${position}.${ext}`
+  const path = `${collectionId}/${nanoid(6)}.${ext}`
 
   const { data, error } = await supabase.storage
     .from("pages")
     .upload(path, processed, {
-      upsert: true,
+      upsert: false,
       contentType: processed.type || `image/${ext}`,
     })
 
