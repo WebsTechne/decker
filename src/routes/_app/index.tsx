@@ -87,7 +87,10 @@ function Home() {
   const filteredCollections = libraryCollections.filter((collection) => {
     switch (currentFilter) {
       case "created":
-        return collection.authorId === session?.user.id
+        return (
+          collection.authorId === session?.user.id ||
+          collection.contributors.some((c) => c.user.id === session?.user.id)
+        )
 
       case "saved":
         return collection.saves.length > 0

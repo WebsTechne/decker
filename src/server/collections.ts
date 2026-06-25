@@ -258,7 +258,18 @@ const getMyCollections = createServerFn({ method: "GET" }).handler(async () => {
 
   try {
     const collections = await prisma.collection.findMany({
-      where: { authorId: session.user.id },
+      where: {
+        OR: [
+          { authorId: session.user.id },
+          {
+            contributors: {
+              some: {
+                userId: session.user.id,
+              },
+            },
+          },
+        ],
+      },
       include: {
         author: {
           select: {
