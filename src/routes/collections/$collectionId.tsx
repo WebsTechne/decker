@@ -20,6 +20,7 @@ import { uploadPages } from "#/lib/pages/upload"
 import { cn } from "#/lib/utils"
 import {
   getCollectionById,
+  getCollectionMetadataById,
   getSavesSimple,
   toggleSaveCollection,
   type CollectionData,
@@ -55,9 +56,30 @@ import { createActivity } from "#/lib/activity"
 import { Checkbox } from "#/components/ui/checkbox"
 import { deleteSupabasePages } from "#/lib/pages/delete"
 import { downloadCollection } from "#/lib/pages/download"
+import { createMetadata } from "#/lib/metadata"
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionIdComponent,
+
+  loader: async ({ params }) => {
+    const metadata = await getCollectionMetadataById({
+      data: { collectionId: params.collectionId },
+    })
+    return { metadata }
+  },
+
+  head: ({ loaderData }) =>
+    createMetadata({
+      title: `${loaderData?.metadata?.name} | Decker`,
+      description:
+        loaderData?.metadata?.description ??
+        `${loaderData?.metadata?._count.pages} pages of study notes by ${
+          loaderData?.metadata?.author.displayUsername
+        }.`,
+      image:
+        loaderData?.metadata?.bannerUrl ??
+        "/card-loading-skeleton-unsplash.jpg",
+    }),
 })
 
 export type Author = {

@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar"
-import { Spinner } from "#/components/ui/spinner"
 import { getActivities, markActivityRead } from "#/lib/activity"
 import { authClient } from "#/lib/auth-client"
 import { cn } from "#/lib/utils"
@@ -7,9 +6,16 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { formatListTimestamp } from "../../../lib/format-timestamp"
 import { Skeleton } from "#/components/ui/skeleton"
+import { createMetadata } from "#/lib/metadata"
 
 export const Route = createFileRoute("/_app/activity/")({
   component: ActivityPage,
+  head: () =>
+    createMetadata({
+      title: "Activity | Decker",
+      description:
+        "Stay updated with saves, comments, new pages, and other activity on your collections.",
+    }),
 })
 
 const widths = ["70%", "80%", "50%"]

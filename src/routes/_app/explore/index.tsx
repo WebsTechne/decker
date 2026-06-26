@@ -19,6 +19,7 @@ import {
 } from "#/components/ui/input-group"
 import { Spinner } from "#/components/ui/spinner"
 import { authClient } from "#/lib/auth-client"
+import { createMetadata } from "#/lib/metadata"
 import { getCollectionList } from "#/server/collections"
 import { FilterIcon, SearchIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -28,6 +29,12 @@ import { useState } from "react"
 
 export const Route = createFileRoute("/_app/explore/")({
   component: RouteComponent,
+  head: () =>
+    createMetadata({
+      title: "Explore | Decker",
+      description:
+        "Discover student-created note collections, lecture slides, handwritten notes, and study materials from across your school.",
+    }),
 })
 
 function RouteComponent() {

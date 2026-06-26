@@ -25,8 +25,17 @@ import {
   CollectionCard,
   CollectionCardSkeleton,
 } from "#/components/sections/collection-card"
+import { createMetadata } from "#/lib/metadata"
 
-export const Route = createFileRoute("/_app/")({ component: Home })
+export const Route = createFileRoute("/_app/")({
+  component: Home,
+  head: () =>
+    createMetadata({
+      title: "Library | Decker",
+      description:
+        "Access your saved study collections, revisit your favorite notes, and continue learning where you left off.",
+    }),
+})
 
 function Home() {
   const { data: session, isPending: authPending } = authClient.useSession()

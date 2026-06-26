@@ -103,6 +103,26 @@ const deleteCollection = createServerFn({ method: "POST" })
     })
   })
 
+const getCollectionMetadataById = createServerFn({ method: "GET" })
+  .inputValidator((data: { collectionId: string }) => data)
+  .handler(async ({ data }) => {
+    const collectionMetadata = await prisma.collection.findFirst({
+      where: { id: data.collectionId },
+      select: {
+        author: { select: { displayUsername: true } },
+        bannerUrl: true,
+        contributors: {
+          select: { user: { select: { displayUsername: true } } },
+        },
+        name: true,
+        description: true,
+        _count: { select: { pages: true, saves: true, comments: true } },
+      },
+    })
+
+    return collectionMetadata
+  })
+
 const getCollectionById = createServerFn({ method: "GET" })
   .inputValidator((data: { collectionId: string }) => data)
   .handler(async ({ data }) => {
@@ -460,6 +480,7 @@ export type { CollectionData, CollectionListData }
 export {
   createCollection,
   deleteCollection,
+  getCollectionMetadataById,
   getCollectionById,
   getCollectionSimple,
   getSavesSimple,

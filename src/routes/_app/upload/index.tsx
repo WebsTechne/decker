@@ -37,6 +37,7 @@ import {
 } from "#/components/ui/input-group"
 import { ScrollArea } from "#/components/ui/scroll-area"
 import { Spinner } from "#/components/ui/spinner"
+import { createMetadata } from "#/lib/metadata"
 import { uploadPages } from "#/lib/pages/upload"
 import { createCollection, deleteCollection } from "#/server/collections"
 import { createPages } from "#/server/pages"
@@ -52,6 +53,12 @@ import { z } from "zod"
 
 export const Route = createFileRoute("/_app/upload/")({
   component: UploadPage,
+  head: () =>
+    createMetadata({
+      title: "Upload | Decker",
+      description:
+        "Create a new collection and share your handwritten notes, lecture slides, and study materials with other students.",
+    }),
 })
 
 const formSchema = z.object({
