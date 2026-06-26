@@ -111,7 +111,7 @@ function Home() {
 
   return (
     <>
-      <section className="flex-between gap-2">
+      <section className="flex-between bg-background sticky top-(--header-h) z-1000 gap-2">
         <InputGroup className="h-10 w-full">
           <InputGroupAddon>
             <HugeiconsIcon icon={SearchIcon} className="size-5!" />

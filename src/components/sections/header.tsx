@@ -103,7 +103,7 @@ export function Header(): JSX.Element {
   const { rightSlot } = useHeaderStore()
 
   return (
-    <header className="flex-between bg-background sticky top-0 z-1000 h-12 shrink-0 px-4 py-2">
+    <header className="flex-between bg-background sticky top-0 z-1000 h-(--header-h) shrink-0 px-4 py-2">
       <span className="font-heading text-2xl font-extrabold">
         <span className="text-blue-400 dark:text-blue-200">D</span>
         <span className="text-blue-400 dark:text-blue-300">e</span>
