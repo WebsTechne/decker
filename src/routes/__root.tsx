@@ -32,15 +32,19 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
           "width=device-width, initial-scale=1, interactive-widget=resizes-content",
       },
       {
-        title: "Decker",
+        title: "Decker — Student Notes & Study Collections",
       },
       {
         name: "description",
         content:
-          "Discover, organize, and share student-created study notes and collections.",
+          "Discover, organize, and share lecture notes, handwritten notes, and study materials with students.",
       },
       {
         property: "og:site_name",
+        content: "Decker",
+      },
+      {
+        name: "application-name",
         content: "Decker",
       },
     ],

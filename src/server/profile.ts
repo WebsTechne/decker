@@ -1,6 +1,22 @@
 import { createServerFn } from "@tanstack/react-start"
 import { prisma } from "#/db"
 
+const getProfileMetadataByUsername = createServerFn({ method: "GET" })
+  .inputValidator((data: { username: string }) => data)
+  .handler(async ({ data: { username } }) => {
+    const profileMetadata = await prisma.user.findUnique({
+      where: { username },
+      select: {
+        displayUsername: true,
+        image: true,
+        school: { select: { name: true } },
+        department: { select: { name: true } },
+      },
+    })
+
+    return profileMetadata
+  })
+
 const getProfileByUsername = createServerFn({ method: "GET" })
   .inputValidator((data: { username: string }) => data)
   .handler(async ({ data: { username } }) => {
@@ -11,8 +27,8 @@ const getProfileByUsername = createServerFn({ method: "GET" })
           displayUsername: true,
           username: true,
           image: true,
-          school: true,
-          department: true,
+          school: { select: { name: true } },
+          department: { select: { name: true } },
           collections: {
             select: {
               bannerUrl: true,
@@ -59,4 +75,4 @@ const getProfileByUsername = createServerFn({ method: "GET" })
     }
   })
 
-export { getProfileByUsername }
+export { getProfileMetadataByUsername, getProfileByUsername }
