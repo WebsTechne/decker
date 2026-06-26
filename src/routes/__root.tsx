@@ -32,7 +32,16 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
           "width=device-width, initial-scale=1, interactive-widget=resizes-content",
       },
       {
-        title: "TanStack Start Starter",
+        title: "Decker",
+      },
+      {
+        name: "description",
+        content:
+          "Discover, organize, and share student-created study notes and collections.",
+      },
+      {
+        property: "og:site_name",
+        content: "Decker",
       },
     ],
     links: [
