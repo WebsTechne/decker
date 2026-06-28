@@ -7,8 +7,12 @@ import {
 import { Button } from "#/components/ui/button"
 import { Spinner } from "#/components/ui/spinner"
 import { authClient } from "#/lib/auth-client"
+import { createMetadata } from "#/lib/metadata"
 import { cn } from "#/lib/utils"
-import { getProfileByUsername } from "#/server/profile"
+import {
+  getProfileByUsername,
+  getProfileMetadataByUsername,
+} from "#/server/profile"
 import {
   ArrowLeft02Icon,
   Edit02Icon,
@@ -26,6 +30,33 @@ import {
 
 export const Route = createFileRoute("/u/$username")({
   component: ProfilePage,
+
+  loader: async ({ params }) => {
+    const metadata = await getProfileMetadataByUsername({
+      data: { username: params.username },
+    })
+    return { metadata }
+  },
+
+  head: ({ loaderData }) => {
+    const metadata = loaderData?.metadata
+
+    const name = metadata?.displayUsername
+
+    let description = `Browse note collections shared by ${name}.`
+
+    if (metadata?.school && metadata.department) {
+      description = `${name} shares study notes for ${metadata.department.name} at ${metadata.school.name}.`
+    } else if (metadata?.school) {
+      description = `${name} shares study notes at ${metadata.school.name}.`
+    }
+
+    return createMetadata({
+      title: `${name} | Decker`,
+      description,
+      image: metadata?.image ?? undefined,
+    })
+  },
 })
 
 function ProfilePage() {
