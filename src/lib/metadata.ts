@@ -5,7 +5,7 @@ type MetadataOptions = {
   type?: "website" | "article"
 }
 
-const APP_URL = process.env.BETTER_AUTH_URL!
+const APP_URL = import.meta.env.VITE_APP_URL!
 
 const createMetadata = ({
   title,
