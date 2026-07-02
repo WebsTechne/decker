@@ -35,10 +35,7 @@ export const auth = betterAuth({
     "decker://*", // Wildcard support for all paths following the scheme
     "exp://", // Trust all Expo URLs (prefix matching)
     "exp://**", // Trust all Expo URLs (wildcard matching)
-    "exp://10.198.*.*:*/**", // Trust 10.198.x.x IP range with any port and path,
-    "http://10.198.*.*:*/**",
-    "http://10.94.8.24:3000", // my phone's ipconfig
-    "http://10.116.68.24:3000",
+    "http://localhost:3001",
   ],
 
   plugins: [username(), tanstackStartCookies()],
