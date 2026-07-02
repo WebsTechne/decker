@@ -130,10 +130,6 @@ function ProfilePage() {
       </div>
     )
 
-  const totalSavesReceived = profile.collections.reduce(
-    (sum, col) => sum + col._count.saves,
-    0,
-  )
   const isMine = session.user.username === username
 
   const {
@@ -144,6 +140,10 @@ function ProfilePage() {
     department,
     school,
   } = profile
+
+  const totalSavesReceived =
+    collections.reduce((sum, col) => sum + col._count.saves, 0) +
+    contributing.reduce((sum, c) => sum + c.collection._count.saves, 0)
 
   const allCollections = [
     ...collections,
@@ -186,9 +186,7 @@ function ProfilePage() {
           <span className="bg-primary absolute inset-0 rounded-b-2xl" />
           <div className="bg-background absolute top-37.5 left-5 size-25 rounded-full p-1">
             <Avatar className="size-full">
-              {profile.image && (
-                <AvatarImage src={profile.image} alt="avatar" />
-              )}
+              {image && <AvatarImage src={image} alt="avatar" />}
               <AvatarFallback className="text-2xl!">
                 {username[0].toUpperCase()}
               </AvatarFallback>
@@ -240,7 +238,8 @@ function ProfilePage() {
           {allCollections.length === 0 && (
             <div className="flex-center aspect-2/1 w-full rounded-xl border border-dashed px-2 not-md:text-sm">
               <p className="text-center">
-                This user hasn&apos;t created any collections yet.
+                This user hasn&apos;t created or contributed to any collections
+                yet.
               </p>
             </div>
           )}

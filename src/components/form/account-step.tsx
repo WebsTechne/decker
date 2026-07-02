@@ -94,8 +94,8 @@ export function AccountStep({
             .min(3, "Username must be at least 3 characters")
             .max(20, "Username must be at most 20 characters")
             .regex(
-              /^[a-zA-Z0-9._-]+$/,
-              "Only letters, numbers, dots, hyphens and underscores",
+              /^[a-zA-Z][a-zA-Z0-9._-]*$/,
+              "Must start with a letter, and contain only letters, numbers, dots, hyphens, and underscores",
             ),
         }}
         children={(field) => {
