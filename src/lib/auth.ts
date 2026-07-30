@@ -36,6 +36,7 @@ export const auth = betterAuth({
     "exp://", // Trust all Expo URLs (prefix matching)
     "exp://**", // Trust all Expo URLs (wildcard matching)
     "http://localhost:3001",
+    "https://decker.pxxl.click"
   ],
 
   plugins: [username(), tanstackStartCookies()],
