@@ -103,7 +103,7 @@ function SignIn() {
 
   return (
     <>
-      <Card size="sm" className="relative z-1000 mt-15 py-6! sm:max-w-md">
+      <Card size="sm" className="relative z-1000 mt-15 py-6!">
         <CardHeader>
           <CardTitle className="text-lg! font-bold">
             Sign In to Decker
@@ -185,6 +185,16 @@ function SignIn() {
                   )
                 }}
               />
+
+              <Field orientation="horizontal" className="justify-end">
+                <Link
+                  to="/auth/forgot-password"
+                  search={{ redirect: search.redirect ?? "/" }}
+                  className="text-muted-foreground text-sm underline-offset-4 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </Field>
 
               {error && (
                 <Field>

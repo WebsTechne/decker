@@ -149,7 +149,7 @@ function SignUp() {
 
   return (
     <>
-      <section className="relative z-1000 flex h-15 w-full items-center gap-5 px-5 sm:max-w-md">
+      <section className="relative z-1000 flex h-15 w-full items-center gap-5 px-5">
         <span
           className={cn("flex-center size-6 rounded-full select-none", {
             "bg-primary text-primary-foreground": step === 1,
@@ -198,10 +198,10 @@ function SignUp() {
           )}
 
           <CardTitle className="text-lg! font-bold">
-            Sign Up to Decker
+            Sign Up for Decker
           </CardTitle>
           <CardDescription>
-            Sign up to Decker for the best experience. You get free access to
+            Sign up for Decker for the best experience. You get free access to
             all features.
           </CardDescription>
         </CardHeader>

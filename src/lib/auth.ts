@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { username } from "better-auth/plugins"
 import { prisma } from "#/db"
+import { transporter } from "./transporter"
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -11,6 +12,15 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      await transporter.sendMail({
+        from: "Decker <decker.apps@gmail.com>",
+        to: user.email,
+        subject: "Reset your Decker password",
+        text: `Reset your Decker password: ${url}\n\nIf you didn't request this, you can ignore this email.`,
+        html: `<p>Click <a href="${url}">here</a> to reset your password.</p><p>If you didn't request this, you can ignore this email.</p>`,
+      })
+    },
   },
 
   user: {
@@ -36,7 +46,7 @@ export const auth = betterAuth({
     "exp://", // Trust all Expo URLs (prefix matching)
     "exp://**", // Trust all Expo URLs (wildcard matching)
     "http://localhost:3001",
-    "https://decker.pxxl.click"
+    "https://decker.pxxl.click",
   ],
 
   plugins: [username(), tanstackStartCookies()],
