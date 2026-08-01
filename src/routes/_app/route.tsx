@@ -1,4 +1,8 @@
 import { Header } from "#/components/sections/header"
+import {
+  VerifyEmailAlertDialog,
+  VerifyEmailDialog,
+} from "#/components/sections/verify-email"
 import { Badge } from "#/components/ui/badge"
 import { Spinner } from "#/components/ui/spinner"
 import {
@@ -8,6 +12,7 @@ import {
 } from "#/components/ui/tooltip"
 import { getUnread } from "#/lib/activity"
 import { authClient } from "#/lib/auth-client"
+import { ENFORCE_EMAIL_VERIFICATION } from "#/lib/config"
 import { cn } from "#/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import {
@@ -18,6 +23,7 @@ import {
   redirect,
 } from "@tanstack/react-router"
 import { Bookmark, Bell, Search, Plus } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -53,6 +59,34 @@ function AppLayout() {
   const { data: session, isPending: authPending } = authClient.useSession()
   const { pathname } = useLocation()
 
+  const needsVerification = session?.user && !session.user.emailVerified
+
+  const dismissKey = session?.user
+    ? `verify-email-dismissed:${session.user.id}`
+    : null
+
+  const [dismissedUntil, setDismissedUntil] = useState<number | null>(() => {
+    if (!dismissKey) return null
+    const stored = localStorage.getItem(dismissKey)
+    return stored ? Number(stored) : null
+  })
+
+  // Re-check dismissal when the user identity changes (e.g. switching accounts)
+  useEffect(() => {
+    if (!dismissKey) return
+    const stored = localStorage.getItem(dismissKey)
+    setDismissedUntil(stored ? Number(stored) : null)
+  }, [dismissKey])
+
+  const isDismissed = dismissedUntil !== null && Date.now() < dismissedUntil
+
+  const handleDismiss = () => {
+    if (!dismissKey) return
+    const until = Date.now() + 24 * 60 * 60 * 1000 // 1 day
+    localStorage.setItem(dismissKey, String(until))
+    setDismissedUntil(until)
+  }
+
   const { data: activities = { hasUnread: false, count: 0 }, isPending } =
     useQuery({
       queryKey: ["activities", "nav"],
@@ -61,6 +95,31 @@ function AppLayout() {
     })
 
   const { hasUnread, count } = activities
+
+  if (needsVerification) {
+    if (ENFORCE_EMAIL_VERIFICATION) {
+      return (
+        <VerifyEmailAlertDialog
+          email={session.user.email}
+          open={true}
+          onOpenChange={() => {}}
+        />
+      )
+    }
+
+    if (!isDismissed) {
+      return (
+        <VerifyEmailDialog
+          email={session.user.email}
+          open={true}
+          onOpenChange={(val) => {
+            if (!val) handleDismiss()
+          }}
+        />
+      )
+    }
+    // dismissed and within the day window — fall through to render the app normally
+  }
 
   return (
     <div className="app-shell flex h-dvh!">

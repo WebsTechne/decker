@@ -86,6 +86,11 @@ function SignIn() {
             case "INVALID_EMAIL_OR_PASSWORD":
               setError("Incorrect username/email or password.")
               return
+            case "EMAIL_NOT_VERIFIED": // ⚠️ confirm exact code, see note below
+              setError(
+                "Please verify your email before signing in — we just sent a fresh link to your inbox.",
+              )
+              return
             default:
               setError(res.error.message ?? "Failed to sign in.")
               return
@@ -158,7 +163,19 @@ function SignIn() {
                     field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid} className="gap-1">
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                      <FieldLabel
+                        htmlFor={field.name}
+                        className="flex-row items-center justify-between"
+                      >
+                        Password
+                        <Link
+                          to="/auth/forgot-password"
+                          search={{ redirect: search.redirect ?? "/" }}
+                          className="text-muted-foreground text-xs underline-offset-4 hover:underline"
+                        >
+                          Forgot password?
+                        </Link>
+                      </FieldLabel>
                       <InputGroup className="h-10">
                         <InputGroupInput
                           id={field.name}
@@ -186,15 +203,9 @@ function SignIn() {
                 }}
               />
 
-              <Field orientation="horizontal" className="justify-end">
-                <Link
-                  to="/auth/forgot-password"
-                  search={{ redirect: search.redirect ?? "/" }}
-                  className="text-muted-foreground text-sm underline-offset-4 hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </Field>
+              {/*<Field orientation="horizontal" className="justify-end">
+                forgot password link here!!!
+              </Field>*/}
 
               {error && (
                 <Field>

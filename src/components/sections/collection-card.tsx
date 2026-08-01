@@ -17,11 +17,14 @@ import { Skeleton } from "../ui/skeleton"
 
 function CollectionCardSkeleton() {
   return (
-    <Card size="sm" className="pt-0!">
+    <Card
+      size="sm"
+      className="rounded-lg! pt-0! *:[img:first-child]:rounded-t-lg! *:[img:last-child]:rounded-b-lg!"
+    >
       <div>
         <Skeleton className="aspect-2/1 w-full rounded-none!" />
       </div>
-      <CardHeader>
+      <CardHeader className="rounded-t-lg!">
         {/* <Skeleton className="h-13.75 w-full rounded-lg" />*/}
         <div className="flex h-13.75 w-full">
           {/* <Skeleton className="size-7 rounded-full" /> */}
@@ -62,7 +65,11 @@ function CollectionCard({
   const isSaved = saves.length > 0
 
   return (
-    <Card size="sm" key={collectionId} className="pt-0!">
+    <Card
+      size="sm"
+      key={collectionId}
+      className="rounded-lg! pt-0! *:[img:first-child]:rounded-t-lg! *:[img:last-child]:rounded-b-lg!"
+    >
       <Link
         to="/collections/$collectionId"
         params={{ collectionId }}
@@ -86,7 +93,7 @@ function CollectionCard({
           )}
         </div>
       </Link>
-      <CardHeader className="gap-2">
+      <CardHeader className="gap-2 rounded-t-lg!">
         <CardTitle className="block items-center truncate">{name}</CardTitle>
         <CardDescription className="no-scrollbar flex items-center gap-2 overflow-x-auto">
           {tags.slice(0, 3).map((tag, tagIndex) => (

@@ -16,6 +16,7 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as UUsernameRouteImport } from './routes/u/$username'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections/$collectionId'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
+import { Route as AuthVerifyEmailSentIndexRouteImport } from './routes/auth/verify-email-sent/index'
 import { Route as AuthSignUpIndexRouteImport } from './routes/auth/sign-up/index'
 import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index'
 import { Route as AuthResetPasswordIndexRouteImport } from './routes/auth/reset-password/index'
@@ -59,6 +60,12 @@ const AppSplatRoute = AppSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AuthVerifyEmailSentIndexRoute =
+  AuthVerifyEmailSentIndexRouteImport.update({
+    id: '/verify-email-sent/',
+    path: '/verify-email-sent/',
+    getParentRoute: () => AuthRouteRoute,
+  } as any)
 const AuthSignUpIndexRoute = AuthSignUpIndexRouteImport.update({
   id: '/sign-up/',
   path: '/sign-up/',
@@ -115,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password/': typeof AuthResetPasswordIndexRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
   '/auth/sign-up/': typeof AuthSignUpIndexRoute
+  '/auth/verify-email-sent/': typeof AuthVerifyEmailSentIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
@@ -131,6 +139,7 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordIndexRoute
   '/auth/sign-in': typeof AuthSignInIndexRoute
   '/auth/sign-up': typeof AuthSignUpIndexRoute
+  '/auth/verify-email-sent': typeof AuthVerifyEmailSentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,6 +158,7 @@ export interface FileRoutesById {
   '/auth/reset-password/': typeof AuthResetPasswordIndexRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
   '/auth/sign-up/': typeof AuthSignUpIndexRoute
+  '/auth/verify-email-sent/': typeof AuthVerifyEmailSentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password/'
     | '/auth/sign-in/'
     | '/auth/sign-up/'
+    | '/auth/verify-email-sent/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/auth/verify-email-sent'
   id:
     | '__root__'
     | '/_app'
@@ -200,6 +212,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password/'
     | '/auth/sign-in/'
     | '/auth/sign-up/'
+    | '/auth/verify-email-sent/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -261,6 +274,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$'
       preLoaderRoute: typeof AppSplatRouteImport
       parentRoute: typeof AppRouteRoute
+    }
+    '/auth/verify-email-sent/': {
+      id: '/auth/verify-email-sent/'
+      path: '/verify-email-sent'
+      fullPath: '/auth/verify-email-sent/'
+      preLoaderRoute: typeof AuthVerifyEmailSentIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/auth/sign-up/': {
       id: '/auth/sign-up/'
@@ -346,6 +366,7 @@ interface AuthRouteRouteChildren {
   AuthResetPasswordIndexRoute: typeof AuthResetPasswordIndexRoute
   AuthSignInIndexRoute: typeof AuthSignInIndexRoute
   AuthSignUpIndexRoute: typeof AuthSignUpIndexRoute
+  AuthVerifyEmailSentIndexRoute: typeof AuthVerifyEmailSentIndexRoute
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
@@ -353,6 +374,7 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthResetPasswordIndexRoute: AuthResetPasswordIndexRoute,
   AuthSignInIndexRoute: AuthSignInIndexRoute,
   AuthSignUpIndexRoute: AuthSignUpIndexRoute,
+  AuthVerifyEmailSentIndexRoute: AuthVerifyEmailSentIndexRoute,
 }
 
 const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(

@@ -83,7 +83,11 @@ function RouteComponent() {
           <InputGroupAddon>
             <HugeiconsIcon icon={SearchIcon} className="size-5!" />
           </InputGroupAddon>
-          <InputGroupInput placeholder="Search collections and tags" />
+          <InputGroupInput
+            placeholder="Search collections and tags"
+            className="pointer-events-auto! cursor-not-allowed!"
+            disabled
+          />
         </InputGroup>
         <DropdownMenu>
           <DropdownMenuTrigger

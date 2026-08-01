@@ -132,7 +132,10 @@ function SignUp() {
 
         // 4 redirect
         toast.success("Sign up successful", { id: "sign-up-toast" })
-        navigate({ to: search.redirect ?? "/" })
+        navigate({
+          to: "/auth/verify-email-sent",
+          search: { email: value.email },
+        })
       } catch (err) {
         console.error(err)
         // 5 cleanup — delete the created user
